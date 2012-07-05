@@ -1,44 +1,60 @@
 # Step 1
 
-def add() {
-    return 1+2*3/(5+91);
-}
+code:
 
-$ alm add
-1.0625
+    def add() {
+        return 1+2*3/(5+91);
+    }
+
+cmd:
+
+    $ alm add
+    1.0625
 
 # Step 2
 
-def add(a,b) {
-    return a+b;
-}
+code:
 
-$ alm add(1.5,3)
-4.5
+    def add(a,b) {
+        return a+b;
+    }
+
+cmd:
+
+    $ alm add(1.5,3)
+    4.5
 
 # Step 3
 
-def add(a,b) {
-    if (b == 0) return a;
-    return b + add(a,b-1);
-}
+code:
 
-def mul(a,b) {
-    return add(a,b);
-}
+    def add(a,b) {
+        if (b == 0) return a;
+        return b + add(a,b-1);
+    }
 
-$ alm mul(5,6)
-30.0
+    def mul(a,b) {
+        return add(a,b);
+    }
+
+cmd:
+
+    $ alm mul(5,6)
+    30.0
 
 # Step 4
 
-def list(n) {
-    if (n == 0) return [];
-    return [n|list(n-1)];
-}
+code:
 
-# alm list(5)
-[5,4,3,2,1]
+    def list(n) {
+        if (n == 0) return [];
+        return [n|list(n-1)];
+    }
+
+cmd:
+
+    # alm list(5)
+    [5,4,3,2,1]
 
 # Step 5
 
