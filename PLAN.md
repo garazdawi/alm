@@ -8,6 +8,17 @@ code: add.alm
         1+2*3/(5+91);
     }
 
+asm: add.asm
+
+    {func, add, 0}
+    {label, add_0}
+    {add, 5, 91, x(0)}
+    {div, 3, x(0), x(1)}
+    {mul, 2, x(1), x(2)}
+    {add, 1, x(2), x(3)}
+    {move, x(3), x(0)}
+    {return}
+
 cmd:
 
     $ alc add.alm
@@ -23,6 +34,13 @@ code: add2.alm
     def add2(a,b) {
         a+b;
     }
+
+asm: add2.asm
+
+    {func, add2, 2}
+    {label, add2_2}
+    {add, x(0), x(1), x(0)}
+    {return}
 
 cmd:
 
@@ -45,6 +63,26 @@ code: mul.alm
         add3(a,b);
     }
 
+asm: mul.asm
+
+    {func,add3,2}
+    {label, add3_2}
+    {eq, x(1), 0, x(2)}
+    {test, x(2), add3_true, add3_false}
+    {label, add3_2_true}
+    {return}
+    {label, add3_2_false}
+    {add, x(1), 1, x(3)}
+    {move, x(1), y(0)}
+    {move, x(3), x(1)}
+    {call, add_3,2,1}
+    {add, x(0), y(0), x(0)}
+    {return}
+
+    {func,mul,2}
+    {call,add3,2,0}
+    {return}
+
 cmd:
 
     $ alc mul.alm
@@ -61,6 +99,22 @@ code: seq.alm
         if (n == 0) [];
         else [n|list(n-1)];
     }
+
+asm: seq.asm
+
+    {func, list, 1}
+    {label, list_1}
+    {eq, x(0), 0, x(1)}
+    {test, x(1), list_1_true, list_1_false}
+    {label, list_1_true}
+    {move, nil, x(0)}
+    {return}
+    {label, list_1_false}
+    {move, x(0), y(0)}
+    {sub, x(0), x(0), 1}
+    {call, list, 1, 1}
+    {cons, y(0), x(0), x(0)}
+    {return}
 
 cmd:
 
@@ -82,28 +136,131 @@ code: mandelbrot.alm
 
     def mandelbrot_r(x,y,yend,iters,rows) {
 	if (y == yend) rows;
-	else mandelbrot_c(x,y,yend,
-		[mandelbrot_calc(x,y,0,0,iters,0)|rows]);
+	else mandelbrot_r(x,y-1,yend,iters,
+		[mandelbrot(x,y,0,0,iters,0)|rows]);
     }
 
     def mandelbrot_c(x,xend,ystart,yend,iters,cols) {
-	if (x == xend) rows;
-	else mandelbrot_c(x-1,xend,ystart,yend,
+	if (x == xend) cols;
+	else mandelbrot_c(x-1,xend,ystart,yend,iters,
 		[mandelbrot_r(x,ystart,yend,iters,[])|cols]);
     }
 
     def mandelbrot(width,height,iters) {
         xstart = widht/2;
 	ystart = height/2;
-	set = mandelbrot_c(xstart,-xstart,ystart,-ystart,iters,[]);
+	mandelbrot_c(xstart,-1*xstart,ystart,-1*ystart,iters,[]);
     }
 
+asm: mandelbrot.asm
+
+    {func, mandelbrot, 6}
+    {label, mandelbrot_6}
+    ;; ((z*z)+(zi*zi))
+    {mul, x(2), x(2), x(6)}
+    {mul, x(3), x(3), x(7)}
+    {add, x(6), x(7), x(8)}
+    {gt, x(8), 4, x(9)}
+    {test, x(9), mandelbrot_6_true, mandelbrot_6_false}
+    {label, mandelbrot_6_true}
+    {move, x(5), x(0)}
+    {return}
+    {eq, x(4), x(5), x(10)}
+    {test, x(10), mandelbrot_6_true_2, mandelbrot_6_false_2}
+    {label, mandelbrot_6_true_2}
+    {move, 0, x(0)}
+    {return}
+    {label, mandelbrot_6_false_2}
+    ;; (z * z) - (zi * zi) + x
+    {mul, x(2), x(2), x(11)}
+    {mul, x(3), x(3), x(12)}
+    {sub, x(11), x(12), x(13)}
+    {add, x(13), x(0), x(14)}
+    ;; 2 * z * zi
+    {mul, 2, x(2), x(15)}
+    {mul, x(15), x(3), x(16)}
+    ;; i + 1
+    {add, x(5), 1, x(17)}
+    {move, x(14), x(2)}
+    {move, x(16), x(3)}
+    {move, x(17), x(5)}
+    {call, mandelbrot, 6, 0}
+    {return}
+
+    {func, mandelbrot_r, 5}
+    {label, mandelbrot_r_5}
+    {eq, x(1), x(2), x(5)}
+    {test, x(5), mandelbrot_r_5_true, mandelbrot_r_5_false}
+    {label, mandelbrot_r_5_true}
+    {move, x(4), x(0)}
+    {return}
+    {label, mandelbrot_r_5_false}
+    {move, x(0), y(0)}
+    {move, x(1), y(1)}
+    {move, x(2), y(2)}
+    {move, x(3), y(3)}
+    {move, x(4), y(4)}
+    {move, x(3), x(4)}
+    {move, 0, x(2)}
+    {move, 0, x(3)}
+    {move, 0, x(5)}
+    {call, mandelbrot, 6, 5}
+    {cons, x(0), y(4), x(4)}
+    {move, y(0), x(0)}
+    {sub, y(1), 1, x(1)}
+    {move, y(2), x(2)}
+    {move, y(3), x(3)}
+    {call, mandelbrot_r, 5, 0}
+    {return}
+
+    {func, mandelbrot_c, 6}
+    {label, mandelbrot_c_6}
+    {eq, x(0), x(1), x(6)}
+    {test, x(6), mandelbrot_c_6_true, mandelbrot_c_6_false}
+    {label, mandelbrot_c_6_true}
+    {move, x(5), x(0)}
+    {return}
+    {label, mandelbrot_c_6_false}
+    {move, x(0), y(0)}
+    {move, x(1), y(1)}
+    {move, x(2), y(2)}
+    {move, x(3), y(3)}
+    {move, x(4), y(4)}
+    {move, x(5), y(5)}
+    {move, x(2), x(1)}
+    {move, x(3), x(2)}
+    {move, x(4), x(3)}
+    {move, nil, x(4)}
+    {call, mandelbrot_r, 5, 6}
+    {cons, x(0), y(5), x(5)}
+    {sub, y(0), 1, x(0)}
+    {move, y(1), x(1)}
+    {move, y(2), x(2)}
+    {move, y(3), x(3)}
+    {move, y(4), x(4)}
+    {call, mandelbrot_r, 5, 0}
+    {return}
+
+    {func, mandelbrot, 3}
+    {label, mandelbrot_3}
+    {div, x(0), 2, x(3)}
+    {div, x(1), 2, x(4)}
+    {mul, x(3), -1, x(5)}
+    {mul, x(4), -1, x(6)}
+    {move, x(3), x(0)}
+    {move, x(5), x(1)}
+    {move, x(4), x(2)}
+    {move, x(6), x(3)}
+    {move, x(2), x(4)}
+    {move, nil, x(5)}
+    {call, mandelbrot_c, 5, 0}
+    {return}
 
 cmd:
 
     # alc mandelbrot.alm
     # alm mandelbrot(400,400,200)
-    "mandelbrot.tiff"
+    huge list
 
 
 # Step 6
