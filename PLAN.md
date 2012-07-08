@@ -1,5 +1,7 @@
 # Step 1
 
+Basic version with constants only and basic arithmetic
+
 code: add.alm
 
     def add() {
@@ -14,6 +16,8 @@ cmd:
 
 # Step 2
 
+Add variales to the mix
+
 code: add2.alm
 
     def add2(a,b) {
@@ -27,6 +31,8 @@ cmd:
     4.5
 
 # Step 3
+
+add if statments
 
 code: mul.alm
 
@@ -47,6 +53,8 @@ cmd:
 
 # Step 4
 
+Add a new datatype called list!
+
 code: seq.alm
 
     def list(n) {
@@ -62,9 +70,7 @@ cmd:
 
 # Step 5
 
-Add GC
-
-# Step 6
+Implement a mandelbrot set calculation
 
 code: mandelbrot.alm
 
@@ -98,3 +104,8 @@ cmd:
     # alc mandelbrot.alm
     # alm mandelbrot(400,400,200)
     "mandelbrot.tiff"
+
+
+# Step 6
+
+Add a tracing copy collect GC
