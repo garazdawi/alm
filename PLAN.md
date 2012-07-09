@@ -27,7 +27,7 @@ cmd:
 
 # Step 2
 
-Add variales to the mix
+Add variales to the mix!
 
 code: add2.alm
 
@@ -39,7 +39,8 @@ asm: add2.asm
 
     {func, add2, 2}
     {label, add2_2}
-    {add, x(0), x(1), x(0)}
+    {add, x(0), x(1), x(2)}
+    {move, x(2), x(0)}
     {return}
 
 cmd:
@@ -68,8 +69,7 @@ asm: mul.asm
     {func,add3,2}
     {label, add3_2}
     {eq, x(1), 0, x(2)}
-    {test, x(2), add3_true, add3_false}
-    {label, add3_2_true}
+    {test, x(2), add3_false}
     {return}
     {label, add3_2_false}
     {add, x(1), 1, x(3)}
@@ -91,7 +91,7 @@ cmd:
 
 # Step 4
 
-Add a new datatype called list!
+Add a new datatype called list! Also we now have to add typechecks when doing arithmetic
 
 code: seq.alm
 
@@ -105,16 +105,19 @@ asm: seq.asm
     {func, list, 1}
     {label, list_1}
     {eq, x(0), 0, x(1)}
-    {test, x(1), list_1_true, list_1_false}
-    {label, list_1_true}
+    {test, x(1), list_1_false}
     {move, nil, x(0)}
     {return}
     {label, list_1_false}
     {move, x(0), y(0)}
-    {sub, x(0), x(0), 1}
+    {is_number, x(0), x(1)}
+    {test, x(1), list_1_error}
+    {sub, x(0), 1, x(0)}
     {call, list, 1, 1}
-    {cons, y(0), x(0), x(0)}
+    {cons, x(0), y(0), x(0)}
     {return}
+    {label, list_1_error}
+    {throw, error}
 
 cmd:
 
@@ -154,6 +157,8 @@ code: mandelbrot.alm
 
 asm: mandelbrot.asm
 
+Note! For brevity I've not included the is_number tests which have to be before each arithmentic operation.
+
     {func, mandelbrot, 6}
     {label, mandelbrot_6}
     ;; ((z*z)+(zi*zi))
@@ -161,13 +166,11 @@ asm: mandelbrot.asm
     {mul, x(3), x(3), x(7)}
     {add, x(6), x(7), x(8)}
     {gt, x(8), 4, x(9)}
-    {test, x(9), mandelbrot_6_true, mandelbrot_6_false}
-    {label, mandelbrot_6_true}
+    {test, x(9), mandelbrot_6_false}
     {move, x(5), x(0)}
     {return}
     {eq, x(4), x(5), x(10)}
-    {test, x(10), mandelbrot_6_true_2, mandelbrot_6_false_2}
-    {label, mandelbrot_6_true_2}
+    {test, x(10), mandelbrot_6_false_2}
     {move, 0, x(0)}
     {return}
     {label, mandelbrot_6_false_2}
@@ -190,8 +193,7 @@ asm: mandelbrot.asm
     {func, mandelbrot_r, 5}
     {label, mandelbrot_r_5}
     {eq, x(1), x(2), x(5)}
-    {test, x(5), mandelbrot_r_5_true, mandelbrot_r_5_false}
-    {label, mandelbrot_r_5_true}
+    {test, x(5), mandelbrot_r_5_false}
     {move, x(4), x(0)}
     {return}
     {label, mandelbrot_r_5_false}
@@ -216,8 +218,7 @@ asm: mandelbrot.asm
     {func, mandelbrot_c, 6}
     {label, mandelbrot_c_6}
     {eq, x(0), x(1), x(6)}
-    {test, x(6), mandelbrot_c_6_true, mandelbrot_c_6_false}
-    {label, mandelbrot_c_6_true}
+    {test, x(6), mandelbrot_c_6_false}
     {move, x(5), x(0)}
     {return}
     {label, mandelbrot_c_6_false}

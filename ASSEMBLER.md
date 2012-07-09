@@ -26,9 +26,9 @@ Return from a function call.
 
 A jump label which a test intruction can just to.
 
-## {test, Test, TrueLabel, FalseLabel}
+## {test, Test, FalseLabel}
 
-A branching test instruction which jump to `FalseLabel` if `Test` is 0, and `TrueLabel` otherwise.
+A branching test instruction which jump to `FalseLabel` if `Test` is 0, and continues executing the next instruction otherwise.
 
 ## {gt, Left, Right, Dest}
 
@@ -46,22 +46,22 @@ Stores 1 in `Dest` if `Left` == `Right`, 0 otherwise.
 
 Copies the value of register `Source` to `Dest`.
 
-## {add, Left, Right, Dest}
+## {add|sub|mul|div, Left, Right, Dest}
 
-Add `Left` to `Right` and store result in `Dest`
-
-## {sub, Left, Right, Dest}
-
-Subtract `Left` from `Right` and store result in `Dest`
-
-## {mul, Left, Right, Dest}
-
-Multiply `Left` with `Right` and store result in `Dest`
-
-## {div, Left, Right, Dest}
-
-Divide `Left` with `Right` and store result in `Dest`
+Add, substract, multiply or divide `Left` to `Right` and store result in `Dest`. Checks using `is_number` have to be made to make sure Both `Left` and `Right` are numbers. `Dest` will always be a number. The reason for putting not putting the checks in the instruction is so the compiler is able to optimize away some checks!
 
 ## {cons, Head, Tail, Dest}
 
-Create a new list element from `Head` and `Tail` and store result in `Dest`
+Create a new list element from `Head` and `Tail` and store result in `Dest`. The `Tail` can be a non-cons/nil element, though this will result in a non-proper list.
+
+## {is_number, Source, Dest}
+
+Stores 1 in `Dest` if the `Source` is a number.
+
+## {is_cons_or_nil, Source, Dest}
+
+Stores 1 in `Dest` if the `Source` is a cons or a nil.
+
+## {throw, Type}
+
+Throw an error. This will print the current stacktrace until the outmost function exits.
