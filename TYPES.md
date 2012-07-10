@@ -10,7 +10,7 @@ There are four different kinds of terms: number, cons, nil and frame. If these n
     if t != 0 value is a number, apply XOR bitmask
     if t == 0 and a = 0, value is signed inf number, change 0s to 1s
 
-      1111   Float Nan            | Change 0s to 1s
+      1111   Float NaN            | Change 0s to 1s
       0000   Frame Ptr            |
       0001   Cons ptr             | 
       0010   NIL
