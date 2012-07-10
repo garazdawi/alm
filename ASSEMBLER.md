@@ -26,7 +26,7 @@ Return from a function call.
 
 A jump label which a test intruction can just to.
 
-## {test, Test, FalseLabel}
+## {brt, Test, FalseLabel}
 
 A branching test instruction which jump to `FalseLabel` if `Test` is 0, and continues executing the next instruction otherwise.
 
@@ -44,7 +44,11 @@ Stores 1 in `Dest` if `Left` == `Right`, 0 otherwise.
 
 ## {move, Source, Dest}
 
-Copies the value of register `Source` to `Dest`.
+Copies the value of register `Source` to `Dest`. Both `Source` and `Dest` can be an x or y register.
+
+## {load, Constant, Dest}
+
+Loads `Constant` into `Dest`
 
 ## {add|sub|mul|div, Left, Right, Dest}
 

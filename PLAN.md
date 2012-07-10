@@ -11,13 +11,18 @@ code: add.alm
 asm: add.asm
 
     {func, add, 0}
-    {label, add_0}
-    {add, 5, 91, x(0)}
-    {div, 3, x(0), x(1)}
-    {mul, 2, x(1), x(2)}
-    {add, 1, x(2), x(3)}
-    {move, x(3), x(0)}
-    {return}
+      {label, add_0}
+      {load, 5, x(0)}
+      {load, 91, x(1)}
+      {add, x(0), x(1), x(2)}
+      {load, 3, x(3)}
+      {div, x(3), x(2), x(4)}
+      {load, 2, x(5)}
+      {mul, x(5), x(4), x(6)}
+      {load, 1, x(7)}
+      {add, x(7), x(6), x(8)}
+      {move, x(8), x(0)}
+      {return}
 
 cmd:
 
@@ -39,9 +44,9 @@ asm: add2.asm
 
     {func, add2, 2}
     {label, add2_2}
-    {add, x(0), x(1), x(2)}
-    {move, x(2), x(0)}
-    {return}
+      {add, x(0), x(1), x(2)}
+      {move, x(2), x(0)}
+      {return}
 
 cmd:
 
@@ -68,20 +73,22 @@ asm: mul.asm
 
     {func,add3,2}
     {label, add3_2}
-    {eq, x(1), 0, x(2)}
-    {test, x(2), add3_false}
-    {return}
+      {load, 0, x(2)}
+      {eq, x(1), x(2), x(3)}
+      {brt, x(3), add3_false}
+      {return}
     {label, add3_2_false}
-    {add, x(1), 1, x(3)}
-    {move, x(1), y(0)}
-    {move, x(3), x(1)}
-    {call, add_3,2,1}
-    {add, x(0), y(0), x(0)}
-    {return}
+      {load, 1, x(2)}
+      {sub, x(1), x(2), x(3)}
+      {move, x(1), y(0)}
+      {move, x(3), x(1)}
+      {call, add_3,2,1}
+      {add, x(0), y(0), x(0)}
+      {return}
 
     {func,mul,2}
-    {call,add3,2,0}
-    {return}
+      {call,add3,2,0}
+      {return}
 
 cmd:
 
@@ -104,20 +111,23 @@ asm: seq.asm
 
     {func, list, 1}
     {label, list_1}
-    {eq, x(0), 0, x(1)}
-    {test, x(1), list_1_false}
-    {move, nil, x(0)}
-    {return}
+      {load, 0, x(1)}
+      {eq, x(0), x(1), x(2)}
+      {brt, x(2), list_1_false}
+      {move, nil, x(0)}
+      {return}
     {label, list_1_false}
-    {move, x(0), y(0)}
-    {is_number, x(0), x(1)}
-    {test, x(1), list_1_error}
-    {sub, x(0), 1, x(0)}
-    {call, list, 1, 1}
-    {cons, x(0), y(0), x(0)}
-    {return}
+      {is_number, x(0), x(1)}
+      {brt, x(1), list_1_error}
+      {load, 1, x(1)}
+      {sub, x(0), x(1), x(2)}
+      {move, x(0), y(0)}
+      {move, x(2), x(0)}
+      {call, list, 1, 1}
+      {cons, x(0), y(0), x(0)}
+      {return}
     {label, list_1_error}
-    {throw, error}
+      {throw, error}
 
 cmd:
 
@@ -161,101 +171,117 @@ Note! For brevity I've not included the is_number tests which have to be before 
 
     {func, mandelbrot, 6}
     {label, mandelbrot_6}
-    ;; ((z*z)+(zi*zi))
-    {mul, x(2), x(2), x(6)}
-    {mul, x(3), x(3), x(7)}
-    {add, x(6), x(7), x(8)}
-    {gt, x(8), 4, x(9)}
-    {test, x(9), mandelbrot_6_false}
-    {move, x(5), x(0)}
-    {return}
-    {eq, x(4), x(5), x(10)}
-    {test, x(10), mandelbrot_6_false_2}
-    {move, 0, x(0)}
-    {return}
+      ;; if (((z*z)+(zi*zi)) > 4)
+      {mul, x(2), x(2), x(6)}
+      {mul, x(3), x(3), x(7)}
+      {add, x(6), x(7), x(8)}
+      {load, 4, x(9)}
+      {gt, x(8), x(9), x(10)}
+      {brt, x(10), mandelbrot_6_false}
+      ;; return i
+      {move, x(5), x(0)}
+      {return}
+    {label, mandelbrot_6_false}
+      ;; if (iters == i)
+      {eq, x(4), x(5), x(10)}
+      {brt, x(10), mandelbrot_6_false_2}
+      {load, 0, x(0)}
+      {return}
     {label, mandelbrot_6_false_2}
-    ;; (z * z) - (zi * zi) + x
-    {mul, x(2), x(2), x(11)}
-    {mul, x(3), x(3), x(12)}
-    {sub, x(11), x(12), x(13)}
-    {add, x(13), x(0), x(14)}
-    ;; 2 * z * zi
-    {mul, 2, x(2), x(15)}
-    {mul, x(15), x(3), x(16)}
-    ;; i + 1
-    {add, x(5), 1, x(17)}
-    {move, x(14), x(2)}
-    {move, x(16), x(3)}
-    {move, x(17), x(5)}
-    {call, mandelbrot, 6, 0}
-    {return}
+      ;; (z * z) - (zi * zi) + x
+      {mul, x(2), x(2), x(11)}
+      {mul, x(3), x(3), x(12)}
+      {sub, x(11), x(12), x(13)}
+      {add, x(13), x(0), x(14)}
+      ;; 2 * z * zi + y
+      {load, 2, x(15)}
+      {mul, x(15), x(2), x(16)}
+      {mul, x(16), x(3), x(17)}
+      {add, x(17), x(1), x(18)}
+      ;; i + 1
+      {load, 1, x(19)}
+      {add, x(5), x(19), x(20)}
+      {move, x(14), x(2)}
+      {move, x(18), x(3)}
+      {move, x(20), x(5)}
+      {call, mandelbrot, 6, 0}
+      {return}
 
     {func, mandelbrot_r, 5}
     {label, mandelbrot_r_5}
-    {eq, x(1), x(2), x(5)}
-    {test, x(5), mandelbrot_r_5_false}
-    {move, x(4), x(0)}
-    {return}
+      ;; if (y == yend)
+      {eq, x(1), x(2), x(5)}
+      {brt, x(5), mandelbrot_r_5_false}
+      {move, x(4), x(0)}
+      {return}
     {label, mandelbrot_r_5_false}
-    {move, x(0), y(0)}
-    {move, x(1), y(1)}
-    {move, x(2), y(2)}
-    {move, x(3), y(3)}
-    {move, x(4), y(4)}
-    {move, x(3), x(4)}
-    {move, 0, x(2)}
-    {move, 0, x(3)}
-    {move, 0, x(5)}
-    {call, mandelbrot, 6, 5}
-    {cons, x(0), y(4), x(4)}
-    {move, y(0), x(0)}
-    {sub, y(1), 1, x(1)}
-    {move, y(2), x(2)}
-    {move, y(3), x(3)}
-    {call, mandelbrot_r, 5, 0}
-    {return}
+      {move, x(0), y(0)}
+      {move, x(1), y(1)}
+      {move, x(2), y(2)}
+      {move, x(3), y(3)}
+      {move, x(4), y(4)}
+      {move, x(3), x(4)}
+      {load, 0, x(2)}
+      {load, 0, x(3)}
+      {load, 0, x(5)}
+      {call, mandelbrot, 6, 5}
+      ;; [H | cols]
+      {cons, x(0), y(4), x(4)}
+      {move, y(0), x(0)}
+      {load, 1, x(5)}
+      ;; y - 1
+      {sub, y(1), x(5), x(1)}
+      {move, y(2), x(2)}
+      {move, y(3), x(3)}
+      {call, mandelbrot_r, 5, 0}
+      {return}
 
     {func, mandelbrot_c, 6}
     {label, mandelbrot_c_6}
-    {eq, x(0), x(1), x(6)}
-    {test, x(6), mandelbrot_c_6_false}
-    {move, x(5), x(0)}
-    {return}
+      ;; if (x == xend)
+      {eq, x(0), x(1), x(6)}
+      {brt, x(6), mandelbrot_c_6_false}
+      {move, x(5), x(0)}
+      {return}
     {label, mandelbrot_c_6_false}
-    {move, x(0), y(0)}
-    {move, x(1), y(1)}
-    {move, x(2), y(2)}
-    {move, x(3), y(3)}
-    {move, x(4), y(4)}
-    {move, x(5), y(5)}
-    {move, x(2), x(1)}
-    {move, x(3), x(2)}
-    {move, x(4), x(3)}
-    {move, nil, x(4)}
-    {call, mandelbrot_r, 5, 6}
-    {cons, x(0), y(5), x(5)}
-    {sub, y(0), 1, x(0)}
-    {move, y(1), x(1)}
-    {move, y(2), x(2)}
-    {move, y(3), x(3)}
-    {move, y(4), x(4)}
-    {call, mandelbrot_r, 5, 0}
-    {return}
+      {move, x(0), y(0)}
+      {move, x(1), y(1)}
+      {move, x(2), y(2)}
+      {move, x(3), y(3)}
+      {move, x(4), y(4)}
+      {move, x(5), y(5)}
+      {move, x(2), x(1)}
+      {move, x(3), x(2)}
+      {move, x(4), x(3)}
+      {load, nil, x(4)}
+      {call, mandelbrot_r, 5, 6}
+      {cons, x(0), y(5), x(5)}
+      {load, 1, x(6)}
+      ;; x - 1
+      {sub, y(0), x(6), x(0)}
+      {move, y(1), x(1)}
+      {move, y(2), x(2)}
+      {move, y(3), x(3)}
+      {move, y(4), x(4)}
+      {call, mandelbrot_r, 5, 0}
+      {return}
 
     {func, mandelbrot, 3}
     {label, mandelbrot_3}
-    {div, x(0), 2, x(3)}
-    {div, x(1), 2, x(4)}
-    {mul, x(3), -1, x(5)}
-    {mul, x(4), -1, x(6)}
-    {move, x(3), x(0)}
-    {move, x(5), x(1)}
-    {move, x(4), x(2)}
-    {move, x(6), x(3)}
-    {move, x(2), x(4)}
-    {move, nil, x(5)}
-    {call, mandelbrot_c, 5, 0}
-    {return}
+      {load, 2, x(3)}
+      {div, x(0), x(3), x(4)}
+      {div, x(1), x(3), x(5)}
+      {load, -1, x(6)}
+      {mul, x(4), x(6), x(7)}
+      {mul, x(5), x(6), x(8)}
+      {move, x(4), x(0)}
+      {move, x(7), x(1)}
+      {move, x(5), x(2)}
+      {move, x(8), x(3)}
+      {move, x(2), x(4)}
+      {load, nil, x(5)}
+      {call, mandelbrot_c, 5, 0}
+      {return}
 
 cmd:
 
