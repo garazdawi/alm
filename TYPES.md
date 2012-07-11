@@ -27,7 +27,7 @@ There are four different kinds of terms: number, cons, nil and frame. If these n
       1110   ??
       1111   ??
 
-Inspiration from [1], [2] and [3]. Sooo many primary tags, do not know what to do with them all!
+Inspiration from [Erlang/OTP][1], [Jaeger Monkey][2] and [wingolog][3]. Sooo many primary tags, do not know what to do with them all!
 
    [1]: https://www.erlang-factory.com/upload/presentations/569/Halfword_Erlang_Factory_SF_2012.pdf
    [2]: http://evilpie.github.com/sayrer-fatval-backup/cache.aspx.htm

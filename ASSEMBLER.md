@@ -1,6 +1,6 @@
 # Assembler code
 
-This document describes the different assembler code and what they do.
+This document describes the different assembler code and what they do. This document is inspired from [Ruslan's Blog][1], [LUA 5.0][2] and [Erlang/OTP][3].
 
 # Constants
 
@@ -62,10 +62,15 @@ Create a new list element from `Head` and `Tail` and store result in `Dest`. The
 
 Stores 1 in `Dest` if the `Source` is a number.
 
-## {is_cons_or_nil, Source, Dest}
+## {is_nil, Source, Dest}
 
-Stores 1 in `Dest` if the `Source` is a cons or a nil.
+Stores 1 in `Dest` if the `Source` is a nil.
 
 ## {throw, Type}
 
 Throw an error. This will print the current stacktrace until the outmost function exits.
+
+
+   [1]: http://ruslanspivak.com/2011/02/08/register-based-virtual-machine-for-tinypie/
+   [2]: http://www.lua.org/doc/jucs05.pdf
+   [3]: http://github.com/erlang/otp
