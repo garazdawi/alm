@@ -16,7 +16,9 @@ Describes the start of a new function with the given `Name` and `Arity`.
 
 Call the function specified by `Name` and `Arity`. It is assumed that all `LiveVars` are pushed to the apporiate y registers before this instruction is issued. The return value will always be in the x(0) register.
 
-If LiveVars is 0 and the instruction is followed by a return instruction, a tail call is made.
+## {tailcall, Name, Arity}
+
+Do a tailcall of the function specified by `Name` and `Arity`.
 
 ## {return}
 
@@ -28,7 +30,7 @@ A jump label which a test intruction can just to.
 
 ## {brt, Test, FalseLabel}
 
-A branching test instruction which jump to `FalseLabel` if `Test` is 0, and continues executing the next instruction otherwise.
+A branching test instruction which jumps to `FalseLabel` if `Test` is 0, and continues executing the next instruction otherwise.
 
 ## {gt, Left, Right, Dest}
 

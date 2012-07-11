@@ -87,8 +87,7 @@ asm: mul.asm
       {return}
 
     {func,mul,2}
-      {call,add3,2,0}
-      {return}
+      {tailcall,add3,2}
 
 cmd:
 
@@ -204,8 +203,7 @@ Note! For brevity I've not included the is_number tests which have to be before 
       {move, x(14), x(2)}
       {move, x(18), x(3)}
       {move, x(20), x(5)}
-      {call, mandelbrot, 6, 0}
-      {return}
+      {tailcall, mandelbrot, 6}
 
     {func, mandelbrot_r, 5}
     {label, mandelbrot_r_5}
@@ -233,8 +231,7 @@ Note! For brevity I've not included the is_number tests which have to be before 
       {sub, y(1), x(5), x(1)}
       {move, y(2), x(2)}
       {move, y(3), x(3)}
-      {call, mandelbrot_r, 5, 0}
-      {return}
+      {tailcall, mandelbrot_r, 5}
 
     {func, mandelbrot_c, 6}
     {label, mandelbrot_c_6}
@@ -263,8 +260,7 @@ Note! For brevity I've not included the is_number tests which have to be before 
       {move, y(2), x(2)}
       {move, y(3), x(3)}
       {move, y(4), x(4)}
-      {call, mandelbrot_r, 5, 0}
-      {return}
+      {tailcall, mandelbrot_r, 5}
 
     {func, mandelbrot, 3}
     {label, mandelbrot_3}
@@ -280,8 +276,7 @@ Note! For brevity I've not included the is_number tests which have to be before 
       {move, x(8), x(3)}
       {move, x(2), x(4)}
       {load, nil, x(5)}
-      {call, mandelbrot_c, 5, 0}
-      {return}
+      {tailcall, mandelbrot_c, 5}
 
 cmd:
 
