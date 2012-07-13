@@ -10,8 +10,11 @@ main(Args) ->
                 _    -> ok
             end,
             case proplists:get_value(expression, Options) of
-                undefined -> [compile_file(Options, File) || File <- Files];
-                Exp       -> io:format("~p~n", [scan_and_parse(Options, Exp)])
+                undefined ->
+		    [compile_file(Options, File) || File <- Files];
+                Exp       ->
+		    {_, Result} = scan_and_parse(Options, Exp),
+		    io:format("~p~n", [Result])
             end;
         {error, {invalid_option, Option}} ->
             io:format("error: invalid option: ~s~n", [Option]), halt(1)
@@ -26,6 +29,8 @@ options() ->
       "Print parser output and exit"},
      {assembler_only, $G, "assembler-only", undefined,
       "Print assembler generate and exit"},
+     {bytecode_only, $B, "bytecode-only", undefined,
+      "Print bytecode and exit"},
      {expression, $e, "expression", string,
       "Compile expression"},
      {help, $h, "help", undefined,
@@ -33,8 +38,12 @@ options() ->
 
 compile_file(Options, File) ->
     {ok, Bin} = file:read_file(File),
-    Result = scan_and_parse(Options, binary_to_list(Bin)),
-    io:format("~p~n", [Result]).
+    case scan_and_parse(Options, binary_to_list(Bin)) of
+	{bytecode,ByteCode} ->
+	    file:write_file(filename:rootname(File)++".alb",ByteCode);
+	{_,Result} ->
+	    io:format("~p~n", [Result])
+    end.
 
 scan_and_parse(Options, String) ->
     try
@@ -44,7 +53,9 @@ scan_and_parse(Options, String) ->
                      fun() -> alm_parser:tokens(Tokens) end),
         ASM    = run(Options, assembler_only,
                      fun() -> alm_compiler:generate(AST) end),
-        ASM
+        BC     = run(Options, bytecode_only,
+                     fun() -> alm_bytecode:generate(ASM) end),
+	{bytecode,BC}
     catch
         throw:Result ->
             Result
@@ -53,6 +64,6 @@ scan_and_parse(Options, String) ->
 
 run(Options, Option, Func) ->
     case proplists:get_bool(Option, Options) of
-        true  -> throw(Func());
+        true  -> throw({Option,Func()});
         false -> Func()
     end.
