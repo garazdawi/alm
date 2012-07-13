@@ -31,17 +31,17 @@ scanner(_Config) ->
 	  {')',_},
 	  {';',_},
 	  {'}',_}]} = erl_parse:parse_term(Toks).
-    
+
 parser(_Config) ->
     Res = os:cmd("almc -P -e \""++test()++"\""),
     {ok, Toks, _} = erl_scan:string(Res++"."),
     {ok, {func,"add",
-	  {add,{number,1},
-	   {multiply,{number,2},
-	    {divide,{number,3},
-	     {add,{number,5},
-	      {number,91}}}}}}}
-	= erl_parse:parse_term(Toks).    
+      {add,{integer,1},
+       {multiply,{integer,2},
+        {divide,{integer,3},
+         {add,{integer,5},
+          {integer,91}}}}}}}
+    = erl_parse:parse_term(Toks).
 
 compiler(_Config) ->
     Res = os:cmd("almc -G -e \""++test()++"\""),
