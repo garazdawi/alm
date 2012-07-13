@@ -5,15 +5,23 @@
 main(Args) ->
     {ok, {Options, Files}} = getopt:parse(options(), Args),
     case proplists:get_bool(help, Options) of
-        true -> getopt:usage(options(), atom_to_list(?MODULE));
-        _    -> [compile_file(Options, File) || File <- Files]
+        true -> print_help();
+        _    -> ok
+    end,
+    case proplists:get_value(expression, Options) of
+        undefined -> [compile_file(Options, File) || File <- Files];
+        Exp       -> io:format("~p~n", [scan_and_parse(Options, Exp)])
     end.
+
+print_help() -> getopt:usage(options(), atom_to_list(?MODULE)), halt(0).
 
 options() ->
     [{scanner_only, $S, "scanner-only", undefined,
       "Print scanner output and exit"},
      {parser_only, $P, "parser-only", undefined,
       "Print parser output and exit"},
+     {expression, $e, "expression", string,
+      "Compile expression"},
      {help, $h, "help", undefined,
       "Print this help and exit"}].
 
@@ -27,7 +35,7 @@ scan_and_parse(Options, String) ->
         Tokens = run(Options, scanner_only,
                      fun() -> alm_scanner:scan(String) end),
         AST    = run(Options, parser_only,
-                     fun() -> alm_parser:parse(Tokens) end),
+                     fun() -> alm_parser:tokens(Tokens) end),
         AST
     catch
         throw:Result ->
@@ -40,4 +48,3 @@ run(Options, Option, Func) ->
         true  -> throw(Func());
         false -> Func()
     end.
-

@@ -23,4 +23,10 @@ Operator -> '/' : divide.
 
 Erlang code.
 
+-export([tokens/1]).
+
 unwrap({_,_,Value}) -> Value.
+
+tokens(Tokens) ->
+    {ok, AST} = parse(Tokens),
+    AST.
