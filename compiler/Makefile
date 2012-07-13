@@ -8,5 +8,11 @@ almc:
 compile:
 	@rebar compile
 
+test: almc
+	@PATH=`pwd`:$$PATH rebar ct
+
 clean:
 	@rebar clean
+
+very_clean: clean
+	rm -rf logs
