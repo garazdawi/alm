@@ -14,7 +14,7 @@ Statement -> Expression ';' : '$1'.
 
 Expression -> '(' Expression ')' : '$2'.
 Expression -> Expression Operator Expression : {'$2','$1','$3'}.
-Expression -> integer : list_to_integer(unwrap('$1')).
+Expression -> integer : {integer,list_to_integer(unwrap('$1'))}.
 
 Operator -> '+' : add.
 Operator -> '-' : subtract.

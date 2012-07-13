@@ -37,3 +37,19 @@ parser(_Config) ->
     {ok, Toks, _} = erl_scan:string(Res++"."),
     {ok, {func,"add",{add,1,{multiply,2,{divide,3,{add,5,91}}}}}} 
 	= erl_parse:parse_term(Toks).    
+
+compiler(_Config) ->
+    Res = os:cmd("almc -G -e \""++test()++"\""),
+    {ok, Toks, _} = erl_scan:string(Res++"."),
+    {ok,[{func,"add",0},
+	 {load,1,{x,1}},
+	 {load,2,{x,2}},
+	 {load,3,{x,3}},
+	 {load,2,{x,4}},
+	 {load,95,{x,5}},
+	 {add,{x,4},{x,5},{x,6}},
+	 {divide,{x,3},{x,6},{x,7}},
+	 {multiply,{x,2},{x,7},{x,8}},
+	 {add,{x,1},{x,8},{x,9}},
+	 {move,{x,9},{x,0}},
+	 {return}]} = erl_parse:parse_term(Toks).    
