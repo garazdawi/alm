@@ -12,6 +12,8 @@ main(Args) ->
 options() ->
     [{scanner_only, $S, "scanner-only", undefined,
       "Print scanner output and exit"},
+     {parser_only, $P, "parser-only", undefined,
+      "Print parser output and exit"},
      {help, $h, "help", undefined,
       "Print this help and exit"}].
 
@@ -21,8 +23,21 @@ compile_file(Options, File) ->
     io:format("~p~n", [Result]).
 
 scan_and_parse(Options, String) ->
-    Tokens = alm_scanner:scan(String),
-    case proplists:get_bool(scanner_only, Options) of
-        true -> Tokens;
-        _    -> {ok, AST} = alm_parser:parse(Tokens), AST
+    try
+        Tokens = run(Options, scanner_only,
+                     fun() -> alm_scanner:scan(String) end),
+        AST    = run(Options, parser_only,
+                     fun() -> alm_parser:parse(Tokens) end),
+        AST
+    catch
+        throw:Result ->
+            Result
     end.
+
+
+run(Options, Option, Func) ->
+    case proplists:get_bool(Option, Options) of
+        true  -> throw(Func());
+        false -> Func()
+    end.
+
