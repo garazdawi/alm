@@ -9,7 +9,7 @@ compile:
 	@rebar compile
 
 test: almc
-	@PATH=`pwd`:$$PATH rebar ct
+	@PATH=`pwd`:$$PATH rebar ct skip_deps=true
 
 clean:
 	@rebar clean
