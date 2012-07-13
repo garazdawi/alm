@@ -1,0 +1,7 @@
+{application, almc,
+ [{description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [kernel, stdlib ]},
+  {mod, {almc, []}},
+  {env, []}]}.

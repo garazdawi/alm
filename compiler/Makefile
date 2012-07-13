@@ -1,3 +1,12 @@
+all: almc
 
-all:
-	@echo "No compiler yet"
+.PHONY: almc compile
+
+almc:
+	@rebar compile escriptize
+
+compile:
+	@rebar compile
+
+clean:
+	@rebar cleana
