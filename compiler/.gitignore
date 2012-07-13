@@ -3,3 +3,5 @@ ebin
 src/alm_parser.erl
 src/alm_scanner.erl
 deps
+logs
+test/almc_SUITE.beam
