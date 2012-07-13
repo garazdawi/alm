@@ -11,9 +11,9 @@ generate({func,Name,Body},CurrReg) ->
     {[{func,Name, 0},BodyGen,{move,{x,BodyReg},{x,0}},{return}],CurrReg};
 generate({integer,Num},CurrReg) ->
     {[{load,Num,{x,CurrReg+1}}],CurrReg+1};
-generate({Op,R,L},CurrReg) when Op == add; 
-				Op == divide; 
-				Op == multiply; 
+generate({Op,R,L},CurrReg) when Op == add;
+				Op == divide;
+				Op == multiply;
 				Op == subtract->
     {LHS,LHSReg} = generate(R,CurrReg),
     {RHS,RHSReg} = generate(L,LHSReg),
