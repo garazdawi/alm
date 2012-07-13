@@ -3,14 +3,18 @@
 -export([main/1]).
 
 main(Args) ->
-    {ok, {Options, Files}} = getopt:parse(options(), Args),
-    case proplists:get_bool(help, Options) of
-        true -> print_help();
-        _    -> ok
-    end,
-    case proplists:get_value(expression, Options) of
-        undefined -> [compile_file(Options, File) || File <- Files];
-        Exp       -> io:format("~p~n", [scan_and_parse(Options, Exp)])
+    case getopt:parse(options(), Args) of
+        {ok, {Options, Files}} ->
+            case proplists:get_bool(help, Options) of
+                true -> print_help();
+                _    -> ok
+            end,
+            case proplists:get_value(expression, Options) of
+                undefined -> [compile_file(Options, File) || File <- Files];
+                Exp       -> io:format("~p~n", [scan_and_parse(Options, Exp)])
+            end;
+        {error, {invalid_option, Option}} ->
+            io:format("error: invalid option: ~s~n", [Option]), halt(1)
     end.
 
 print_help() -> getopt:usage(options(), atom_to_list(?MODULE)), halt(0).
