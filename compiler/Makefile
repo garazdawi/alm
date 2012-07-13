@@ -9,4 +9,4 @@ compile:
 	@rebar compile
 
 clean:
-	@rebar cleana
+	@rebar clean
