@@ -7,7 +7,6 @@
 
 generate(ASM) ->
     Constants = lists:usort(get_constants(ASM)),
-    io:format("~p~n",[Constants]),
     [?HEADER,?VSN,<<(length(Constants)):32>>,
      [gen_constant(Const) || Const <- Constants],
      gen_code(ASM,Constants)].
