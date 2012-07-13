@@ -2,3 +2,4 @@ almc
 ebin
 src/alm_parser.erl
 src/alm_scanner.erl
+deps
