@@ -15,8 +15,8 @@ generate({Op,R,L},CurrReg) when Op == add;
 				Op == divide;
 				Op == multiply;
 				Op == subtract->
-    {LHS,LHSReg} = generate(R,CurrReg),
-    {RHS,RHSReg} = generate(L,LHSReg),
+    {LHS,LHSReg} = generate(L,CurrReg),
+    {RHS,RHSReg} = generate(R,LHSReg),
     {[LHS,RHS,{Op,{x,LHSReg},{x,RHSReg},{x,RHSReg+1}}],RHSReg+1}.
     
 
