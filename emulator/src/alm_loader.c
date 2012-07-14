@@ -1,11 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <string.h>
 #include <sys/stat.h>
 
 #include "alm_loader.h"
 
-#define CHK(expr) if (expr) return -1
+#define CHK(expr) do { if (expr) { printf("Failed on line %d\r\n",__LINE__); exit(1); } } while(0)
 
 #define get_int32(s) ((((unsigned char*) (s))[0] << 24) | \
                       (((unsigned char*) (s))[1] << 16) | \
@@ -16,7 +17,7 @@ int load_constants(char **filebuf, code_t *new_code) {
     int i;
 
     new_code->num_constants = get_int32(*filebuf);
-    new_code->constants = malloc(sizeof(int)*new_code->num_constants);
+    new_code->constants = malloc(sizeof(uint32_t)*new_code->num_constants);
     (*filebuf) += 4;
     printf("Constants: %d\r\n",new_code->num_constants);
 
@@ -40,8 +41,7 @@ int load_instructions(char **filebuf, code_t *new_code) {
 
 int load(code_t *new_code, char *filename) {
     struct stat st;
-    int fd;
-    int i;
+    int fd, i;
     char *filebuf, *fileptr;
 
     // File does not exist
