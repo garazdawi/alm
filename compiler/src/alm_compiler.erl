@@ -3,24 +3,33 @@
 -export([generate/1]).
 
 generate(AST) ->
-    {ASM,_LastReg} = generate(AST,0),
+    {ASM,_LastReg,_Reg} = generate(AST,[]),
     lists:flatten(ASM).
 
-generate({func,Name,Body},CurrReg) ->
-    {BodyGen,BodyReg} = generate(Body,CurrReg),
-    {[{func,Name, 0},BodyGen,{move,{x,BodyReg},{x,0}},{return}],CurrReg};
-generate({integer,Num},CurrReg) ->
-    {[{load,Num,{x,CurrReg+1}}],CurrReg+1};
-generate({Op,R,L},CurrReg) when Op == add;
-				Op == divide;
-				Op == multiply;
-				Op == subtract->
-    {LHS,LHSReg} = generate(L,CurrReg),
-    {RHS,RHSReg} = generate(R,LHSReg),
-    {[LHS,RHS,{Op,{x,LHSReg},{x,RHSReg},{x,RHSReg+1}}],RHSReg+1}.
+generate({func,Name,Body},Regs) ->
+    {BodyGen,BodyRegs,Reg} = generate(Body,Regs),
+    % Only generate move if last operation was not to {x,0}
+    Move = if Reg == 0 -> []; true -> [{move,{x,Reg},{x,0}}] end,
+    {[{func,Name, 0},BodyGen,Move,{return}],BodyRegs,Reg};
+generate({integer,Num},Regs) ->
+    Reg = next_reg(Regs),
+    {[{load,Num,{x,Reg}}],[Reg|Regs],Reg};
+generate({Op,L,R},Regs) 
+  when Op == add;
+       Op == divide;
+       Op == multiply;
+       Op == subtract->
+    {RHS,RHSRegs,RHSReg} = generate(R,Regs),
+    {LHS,LHSRegs,LHSReg} = generate(L,RHSRegs),
+    Reg = next_reg(RHSRegs),
+    %% Remove unused registers
+    AvailRegs = LHSRegs -- [LHSReg,RHSReg],
+    %% RHS before LHS in order to not load all constants first
+    {[RHS,LHS,{Op,{x,LHSReg},{x,RHSReg},{x,Reg}}],[Reg|AvailRegs],Reg}.
     
-
-     
-
-
-
+next_reg(Regs) ->
+    next_reg(lists:sort(Regs),0).
+next_reg([N|T],N) ->
+    next_reg(T,N+1);
+next_reg(_,N) ->
+    N.

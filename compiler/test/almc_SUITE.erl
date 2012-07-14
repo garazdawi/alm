@@ -7,7 +7,7 @@ all() ->
 
 test() ->
     "def add() {
-        1+2*3/(5+91);
+        1+3*30/(95-5);
     }".
 
 -define(RUN_SCAN_TEST(Test,Flag,Program),
@@ -15,7 +15,7 @@ test() ->
 	try
 	    Test = Result
 	catch _E:_R ->
-		ct:pal("~p = ~p",[??Test,Result]),
+		ct:pal("~p",[??Test]),
 		ct:fail(Result)
 	end).
 
@@ -27,14 +27,14 @@ scanner(_Config) ->
 		    {'{',_},
 		    {integer,_,"1"},
 		    {'+',_},
-		    {integer,_,"2"},
-		    {'*',_},
 		    {integer,_,"3"},
+		    {'*',_},
+		    {integer,_,"30"},
 		    {'/',_},
 		    {'(',_},
+		    {integer,_,"95"},
+		    {'-',_},
 		    {integer,_,"5"},
-		    {'+',_},
-		    {integer,_,"91"},
 		    {')',_},
 		    {';',_},
 		    {'}',_}],"-S",test()).
@@ -42,24 +42,23 @@ scanner(_Config) ->
 parser(_Config) ->
     ?RUN_SCAN_TEST({func,"add",
 		    {add,{integer,1},
-		     {multiply,{integer,2},
-		      {divide,{integer,3},
-		       {add,{integer,5},{integer,91}}}}}},
+		     {multiply,{integer,3},
+		      {divide,{integer,30},
+		       {subtract,{integer,95},{integer,5}}}}}},
 		   "-P",test()).
 
 compiler(_Config) ->
-    ?RUN_SCAN_TEST([{func,"add",0},
-                   {load,91,{x,1}},
-                   {load,5,{x,2}},
-                   {add,{x,1},{x,2},{x,3}},
-                   {load,3,{x,4}},
-                   {divide,{x,3},{x,4},{x,5}},
-                   {load,2,{x,6}},
-                   {multiply,{x,5},{x,6},{x,7}},
-                   {load,1,{x,8}},
-                   {add,{x,7},{x,8},{x,9}},
-                   {move,{x,9},{x,0}},
-                   {return}],"-G",test()).
+    run_scan_test([{func,"add",0},
+		    {load,5,{x,0}},
+		    {load,95,{x,1}},
+		    {subtract,{x,1},{x,0},{x,1}},
+		    {load,30,{x,0}},
+		    {divide,{x,0},{x,1},{x,0}},
+		    {load,3,{x,1}},
+		    {multiply,{x,1},{x,0},{x,1}},
+		    {load,1,{x,0}},
+		    {add,{x,0},{x,1},{x,0}},
+		    {return}],"-G",test()).
 
 
 run_scan_test(Test,Flag,String) ->
