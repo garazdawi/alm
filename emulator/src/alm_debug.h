@@ -8,9 +8,11 @@
 #ifndef ALM_DEBUG_H_
 #define ALM_DEBUG_H_
 
+#include <stdlib.h>
+
 #include "alm_loader.h"
 
-#define DEBUG 1
+//#define DEBUG 1
 
 #define CHK(expr) do { if (expr) { printf("Failed on line %d\r\n",__LINE__); exit(1); } } while(0)
 

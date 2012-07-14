@@ -71,13 +71,6 @@ int load(code_t *new_code, char *filename) {
 
     CHK(read(fd, filebuf, st.st_size) == -1);
 
-    for (i = 0; i < st.st_size; i++) {
-        if (i % 8 == 0)
-            printf("\r\n");
-        printf("%.2hhx ", filebuf[i]);
-    }
-    printf("\r\n");
-
     if (strncmp(filebuf, "alm", 3) != 0) {
         printf("File is not an alm file\r\n");
         return -1;
