@@ -17,16 +17,16 @@ int load_constants(char **filebuf, code_t *new_code) {
     int i;
 
     new_code->num_constants = get_int32(*filebuf);
-    new_code->constants = malloc(sizeof(uint32_t)*new_code->num_constants);
+    new_code->constants = malloc(sizeof(ATERM)*new_code->num_constants);
     (*filebuf) += 4;
 
 
     for (i = 0; i < new_code->num_constants; i++) {
 	int size = *((*filebuf)++);
 	if (size == 4)
-	    new_code->constants[i] = get_int32(*filebuf);
+	    new_code->constants[i] = (ATERM)get_int32(*filebuf);
 	else
-	    new_code->constants[i] = 0;
+	    new_code->constants[i] = (ATERM)0.0;
 
 	(*filebuf) += size;
     }

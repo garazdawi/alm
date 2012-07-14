@@ -6,7 +6,7 @@
 int process_main(code_t* code) {
     uint32_t *I;
     uint64_t *S;
-    uint64_t reg_x[32];
+    ATERM reg_x[32];
     uint64_t reg_y[255];
 
     int A, B, C;
@@ -33,7 +33,7 @@ int process_main(code_t* code) {
 		    case I_RET: {
 			S-=2;
 			if (S == reg_y) {
-			    printf("%lld\r\n",reg_x[0]);
+			    printf("%lf\r\n",reg_x[0]);
 			    return 0;
 			} else {
 			    I = (uint32_t*)*S;

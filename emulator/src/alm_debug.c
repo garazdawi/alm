@@ -14,7 +14,7 @@ int alm_disasm(code_t* code) {
 
     printf("Constants: %d\r\n", code->num_constants);
     for (i = 0; i < code->num_constants; i++) {
-	printf("  const[%d] : %d\r\n", i, code->constants[i]);
+	printf("  const[%d] : %lf\r\n", i, code->constants[i]);
     }
 
     printf("Instructions: %d\r\n", code->num_instructions);

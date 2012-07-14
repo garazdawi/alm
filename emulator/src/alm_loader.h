@@ -4,9 +4,11 @@
 
 #include <stdint.h>
 
+#include "alm_term.h"
+
 typedef struct code {
     int num_constants, num_instructions;
-    uint32_t *constants;
+    ATERM *constants;
     uint32_t *instructions;
 } code_t;
 
