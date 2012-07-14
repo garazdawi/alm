@@ -9,6 +9,7 @@ generate(ASM) ->
     Constants = lists:usort(get_constants(ASM)),
     [?HEADER,?VSN,<<(length(Constants)):32>>,
      [gen_constant(Const) || Const <- Constants],
+     <<(length(ASM)):32>>,
      gen_code(ASM,Constants)].
 
 get_constants([{load,Const,_}|T]) ->
@@ -36,27 +37,19 @@ gen_constant(Str) when length(Str) < 255 ->
 -define(SUBTRACT, 6).
 -define(RETURN,   7).
 
--define(iABC(I,A,B,C),<<I:6,A:8,B:9,C:9>>).
+-define(iABC(I,A,B,C),<<(I):6,(A):8,(B):9,(C):9>>).
 -define(X(R),(element(2,R))).
+-define(C(C),(index(C,Constants))).
+-define(gen_code(M,E),gen_code([M|T],Constants) -> [E | gen_code(T,Constants)]).
 
-gen_code([{load,Const,Reg}|T],Constants) ->
-    N = index(Const,Constants),
-    [?iABC(?LOAD,N,?X(Reg),0) | gen_code(T,Constants)];
-gen_code([{move,Source,Dest}|T],Constants) ->
-    [?iABC(?LOAD,?X(Source),?X(Dest),0) | gen_code(T,Constants)];
-gen_code([{return}|T],Constants) ->
-    [?iABC(?RETURN,0,0,0) | gen_code(T,Constants)];
-gen_code([{func,Name,Arity}|T],Constants) ->
-    N = index(Name,Constants),
-    [?iABC(?FUNC,N,Arity,0) | gen_code(T,Constants)];
-gen_code([{add,Left,Right,Dest}|T],Constants) ->
-    [?iABC(?ADD,?X(Left),?X(Right),?X(Dest)) | gen_code(T,Constants)];
-gen_code([{multiply,Left,Right,Dest}|T],Constants) ->
-    [?iABC(?MULTIPLY,?X(Left),?X(Right),?X(Dest)) | gen_code(T,Constants)];
-gen_code([{subtract,Left,Right,Dest}|T],Constants) ->
-    [?iABC(?SUBTRACT,?X(Left),?X(Right),?X(Dest)) | gen_code(T,Constants)];
-gen_code([{divide,Left,Right,Dest}|T],Constants) ->
-    [?iABC(?DIVIDE,?X(Left),?X(Right),?X(Dest)) | gen_code(T,Constants)];
+?gen_code({load,C,D},         ?iABC(?LOAD,    ?C(C),   ?X(D),   0     ));
+?gen_code({move,S,D},         ?iABC(?MOVE,    ?X(S),   ?X(D),   0     ));
+?gen_code({return},           ?iABC(?RETURN,  0,       0,       0     ));
+?gen_code({func,N,A},         ?iABC(?FUNC,    ?C(N),   A,       0     ));
+?gen_code({add,L,R,D},        ?iABC(?ADD,     ?X(L),   ?X(R),   ?X(D) ));
+?gen_code({multiply,L,R,D},   ?iABC(?MULTIPLY,?X(L),   ?X(R),   ?X(D) ));
+?gen_code({subtract,L,R,D},   ?iABC(?SUBTRACT,?X(L),   ?X(R),   ?X(D) ));
+?gen_code({divide,L,R,D},     ?iABC(?DIVIDE,  ?X(L),   ?X(R),   ?X(D) ));
 gen_code([],_) ->
     [].
 
