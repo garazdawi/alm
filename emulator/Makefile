@@ -1,6 +1,9 @@
+OBJ_DIR=.obj
+OBJ=$(OBJ_DIR)/alm_main.o $(OBJ_DIR)/alm_loader.o $(OBJ_DIR)/alm_debug.o
+
 all: alm
 
-alm: .obj/alm_main.o .obj/alm_loader.o
+alm: $(OBJ)
 	gcc -g -o $@ $^
 
 .obj/%.o: src/%.c .obj

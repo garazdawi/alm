@@ -4,9 +4,9 @@
 #include <string.h>
 #include <sys/stat.h>
 
+#include "alm_instructions.h"
+#include "alm_debug.h"
 #include "alm_loader.h"
-
-#define CHK(expr) do { if (expr) { printf("Failed on line %d\r\n",__LINE__); exit(1); } } while(0)
 
 #define get_int32(s) ((((unsigned char*) (s))[0] << 24) | \
                       (((unsigned char*) (s))[1] << 16) | \
@@ -19,7 +19,7 @@ int load_constants(char **filebuf, code_t *new_code) {
     new_code->num_constants = get_int32(*filebuf);
     new_code->constants = malloc(sizeof(uint32_t)*new_code->num_constants);
     (*filebuf) += 4;
-    printf("Constants: %d\r\n",new_code->num_constants);
+
 
     for (i = 0; i < new_code->num_constants; i++) {
 	int size = *((*filebuf)++);
@@ -27,7 +27,7 @@ int load_constants(char **filebuf, code_t *new_code) {
 	    new_code->constants[i] = get_int32(*filebuf);
 	else
 	    new_code->constants[i] = 0;
-	printf("  const[%d] : %d\r\n",i,new_code->constants[i]);
+
 	(*filebuf) += size;
     }
 
@@ -40,37 +40,16 @@ int load_instructions(char **filebuf, code_t *new_code) {
     new_code->num_instructions = get_int32(*filebuf);
     new_code->instructions = malloc(sizeof(uint32_t)*new_code->num_instructions);
     (*filebuf) += 4;
-    printf("Instructions: %d\r\n",new_code->num_instructions);
 
     for (i = 0; i < new_code->num_instructions; i++) {
 	new_code->instructions[i] = get_int32(*filebuf);
+	if (GET_INSTR(new_code->instructions+i) < 0 ||
+		GET_INSTR(new_code->instructions+i) >= INSTR_COUNT) {
+	    // Do a small sanity check
+	    printf("Encountered invalid instruction 0x%X\r\n",new_code->instructions[i]);
+	    exit(1);
+	}
 	(*filebuf) += 4;
-	printf("%.8x ",new_code->instructions[i]);
-	switch (new_code->instructions[i] >> 26) {
-	/* -define(MOVE,     0).
-	-define(LOAD,     1).
-	-define(FUNC,     2).
-	-define(ADD,      3).
-	-define(DIVIDE,   4).
-	-define(MULTIPLY, 5).
-	-define(SUBTRACT, 6).
-	-define(RETURN,   7). */
-#define REG_A(I) (I >> 18) & (255)
-#define REG_B(I) (I >> 9) & (511)
-#define REG_C(I) (I) & (511)
-	case 0: { printf(" move"); break; }
-	case 1: { printf(" load"); break; }
-	case 2: { printf(" func"); break; }
-	case 3: { printf(" add "); break; }
-	case 4: { printf(" div"); break; }
-	case 5: { printf(" mul"); break; }
-	case 6: { printf(" sub"); break; }
-	case 7: { printf(" ret"); break; }
-	default: {
-	    printf("Unexpected %d\r\n",new_code->instructions[i] >> 26);
-	}
-	}
-	printf(" %d %d %d\r\n",REG_A(new_code->instructions[i]),REG_B(new_code->instructions[i]),REG_C(new_code->instructions[i]));
     }
 
     return 0;
@@ -112,5 +91,11 @@ int load(code_t *new_code, char *filename) {
     CHK(load_constants(&filebuf,new_code) != 0);
     CHK(load_instructions(&filebuf,new_code) != 0);
     free(fileptr);
+
+#ifdef DEBUG
+    printf("Loaded new code from %s:\r\n",filename);
+    alm_disasm(new_code);
+#endif
+
     return 0;
 }
