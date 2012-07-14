@@ -35,6 +35,43 @@ int load_constants(char **filebuf, code_t *new_code) {
 }
 
 int load_instructions(char **filebuf, code_t *new_code) {
+    int i;
+
+    new_code->num_instructions = get_int32(*filebuf);
+    new_code->instructions = malloc(sizeof(uint32_t)*new_code->num_instructions);
+    (*filebuf) += 4;
+    printf("Instructions: %d\r\n",new_code->num_instructions);
+
+    for (i = 0; i < new_code->num_instructions; i++) {
+	new_code->instructions[i] = get_int32(*filebuf);
+	(*filebuf) += 4;
+	printf("%.8x ",new_code->instructions[i]);
+	switch (new_code->instructions[i] >> 26) {
+	/* -define(MOVE,     0).
+	-define(LOAD,     1).
+	-define(FUNC,     2).
+	-define(ADD,      3).
+	-define(DIVIDE,   4).
+	-define(MULTIPLY, 5).
+	-define(SUBTRACT, 6).
+	-define(RETURN,   7). */
+#define REG_A(I) (I >> 18) & (255)
+#define REG_B(I) (I >> 9) & (511)
+#define REG_C(I) (I) & (511)
+	case 0: { printf(" move"); break; }
+	case 1: { printf(" load"); break; }
+	case 2: { printf(" func"); break; }
+	case 3: { printf(" add "); break; }
+	case 4: { printf(" div"); break; }
+	case 5: { printf(" mul"); break; }
+	case 6: { printf(" sub"); break; }
+	case 7: { printf(" ret"); break; }
+	default: {
+	    printf("Unexpected %d\r\n",new_code->instructions[i] >> 26);
+	}
+	}
+	printf(" %d %d %d\r\n",REG_A(new_code->instructions[i]),REG_B(new_code->instructions[i]),REG_C(new_code->instructions[i]));
+    }
 
     return 0;
 }
