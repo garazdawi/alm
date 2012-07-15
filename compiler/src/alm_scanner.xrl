@@ -11,6 +11,7 @@ def  : {token,{def,TokenLine}}.
 {L}+ : {token,{identifier,TokenLine,TokenChars}}.
 {O}  : {token,{list_to_atom(TokenChars),TokenLine}}.
 {D}+ : {token,{integer,TokenLine,TokenChars}}.
+,    : {token,{',',TokenLine}}.
 {S}+ : skip_token.
 
 Erlang code.

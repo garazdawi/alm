@@ -3,24 +3,30 @@
 -export([generate/1]).
 
 generate(AST) ->
-    {ASM,_LastReg,_Reg} = generate(AST,[]),
+    {ASM,_LastReg,_Reg} = generate(AST,[],[]),
     lists:flatten(ASM).
 
-generate({func,Name,Body},Regs) ->
-    {BodyGen,BodyRegs,Reg} = generate(Body,Regs),
+generate({func,Name,Args,Body},[],Regs) ->
+    {ArgMap,ArgRegs} = lists:mapfoldl(fun(Arg,RegAcc) ->
+					      N = next_reg(RegAcc),
+					      {{Arg,N},[N|RegAcc]}
+				      end,Regs,Args),
+    {BodyGen,BodyRegs,Reg} = generate(Body,ArgMap,ArgRegs),
     % Only generate move if last operation was not to {x,0}
     Move = if Reg == 0 -> []; true -> [{move,{x,Reg},{x,0}}] end,
     {[{func,Name, 0},BodyGen,Move,{return}],BodyRegs,Reg};
-generate({integer,Num},Regs) ->
+generate({integer,Num},_,Regs) ->
     Reg = next_reg(Regs),
     {[{load,Num,{x,Reg}}],[Reg|Regs],Reg};
-generate({Op,L,R},Regs) 
+generate({variable,V},Args,Regs) ->
+    {[],Regs,proplists:get_value(V,Args)};
+generate({Op,L,R},Args,Regs) 
   when Op == add;
        Op == divide;
        Op == multiply;
        Op == subtract->
-    {RHS,RHSRegs,RHSReg} = generate(R,Regs),
-    {LHS,LHSRegs,LHSReg} = generate(L,RHSRegs),
+    {RHS,RHSRegs,RHSReg} = generate(R,Args,Regs),
+    {LHS,LHSRegs,LHSReg} = generate(L,Args,RHSRegs),
     Reg = next_reg(RHSRegs),
     %% Remove unused registers
     AvailRegs = LHSRegs -- [LHSReg,RHSReg],
