@@ -3,16 +3,19 @@
 #include "alm_instructions.h"
 #include "alm_loader.h"
 
-int process_main(code_t* code) {
+int process_main(code_t* code, ATERM *args, int arg_len) {
     uint32_t *I;
     uint64_t *S;
     ATERM reg_x[32];
     uint64_t reg_y[255];
 
-    int A, B, C;
+    int A, B, C, i;
 
     I = code->instructions;
     S = reg_y;
+
+    for (i = 0; i < arg_len; i++)
+      reg_x[i] = args[i];
 
     while (1) {
 	GET_iABC(I, A, B, C);

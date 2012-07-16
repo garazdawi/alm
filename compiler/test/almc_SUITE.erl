@@ -40,7 +40,7 @@ scanner(_Config) ->
 		    {'}',_}],"-S",test()).
     
 parser(_Config) ->
-    ?RUN_SCAN_TEST({func,"add",
+    ?RUN_SCAN_TEST({func,"add",[],
 		    {add,{integer,1},
 		     {multiply,{integer,3},
 		      {divide,{integer,30},

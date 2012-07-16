@@ -14,7 +14,7 @@
 
 #define DEBUG 1
 
-#define CHK(expr) do { if (expr) { printf("Failed on line %d\r\n",__LINE__); exit(1); } } while(0)
+#define CHK(expr) do { if (expr) { printf("Failed on line %d in %s\r\n",__LINE__,__FUNCTION__); exit(1); } } while(0)
 
 int alm_disasm(code_t* code);
 
