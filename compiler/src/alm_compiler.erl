@@ -10,7 +10,9 @@ generate(AST) ->
     lists:flatten(generate(AST,#s{})).
 
 generate([Func|T],S) ->
-    [generate(Func,S)|generate(T)];
+    %% We carry labelcnt beteen functions, the others are deleted in {func}
+    {ASM,NewS} = generate(Func,S),
+    [ASM|generate(T,NewS)];
 generate([],_) ->
     [];
 generate({func,Name,Args,Body},S) ->
@@ -18,12 +20,12 @@ generate({func,Name,Args,Body},S) ->
 					      N = next_reg(RegAcc),
 					      {{Arg,N},[N|RegAcc]}
 				      end,[],Args),
-    {BodyGen,_BodyS,Reg} = generate(Body,S#s{funcname = Name,
+    {BodyGen,BodyS,Reg} = generate(Body,S#s{funcname = Name,
 					     vars = ArgMap,
 					     regs = ArgRegs}),
     % Only generate move if last operation was not to {x,0}
     Move = if Reg == 0 -> []; true -> [{move,{x,Reg},{x,0}}] end,
-    [{func,Name, length(Args)},BodyGen,Move,{return}];
+    {[{func,Name, length(Args)},BodyGen,Move,{return}],BodyS};
 generate({integer,Num},S) ->
     {Reg,NewS} = next_reg(S),
     {[{load,Num,{x,Reg}}],NewS,Reg};
@@ -93,5 +95,5 @@ del_regs(S = #s{ regs = Regs, vars = Vars },RegsToDel) ->
     FilteredRegs = [R || R <- RegsToDel,proplists:get_value(R,Vars,false)],
     S#s{ regs = Regs -- FilteredRegs }.
 
-next_label(S = #s{ funcname = FN, labelcnt = N }) ->
-    {FN++"_"++integer_to_list(N),S#s{ labelcnt = N + 1}}.
+next_label(S = #s{ labelcnt = N }) ->
+    {N,S#s{ labelcnt = N + 1}}.
