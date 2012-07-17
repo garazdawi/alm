@@ -21,7 +21,7 @@ typedef union { uint64_t bin; double num; } ATERM;
 #define num_val(x) (mk_num(x)).num
 
 /* Stack frames pushed to stack on function call */
-#define is_frame(x) ((x) > 1 && ((x) >> 48) == 0)
+#define is_frame(x) ((x).bin > 1 && ((x).bin >> 48) == 0)
 #define frame_val(x) (x).bin
 #define mk_frame(x) (ATERM)((mk_non_num((uint64_t)x)).bin & 0x0000FFFFFFFFFFFF)
 
