@@ -21,25 +21,30 @@ get_constants([_|T]) ->
 get_constants([]) ->
     [].
 
+-define(INTEGER, 0).
+-define(STRING, 1).
+
 gen_constant(Int) when is_integer(Int) ->
-    <<0,4,Int:32>>;
+    <<?INTEGER,4,Int:32>>;
 gen_constant(Str) when length(Str) < 255 ->
     Len = length(Str),
     Bin = list_to_binary(Str),
-    <<1,Len:8,Bin/binary>>.
+    <<?STRING,Len:8,Bin/binary>>.
 
--define(MOVE,     0).
--define(LOAD,     1).
--define(FUNC,     2).
--define(ADD,      3).
--define(DIVIDE,   4).
--define(MULTIPLY, 5).
--define(SUBTRACT, 6).
--define(RETURN,   7).
--define(JUMP,     8).
--define(TEST,     9).
--define(CALL,     10).
--define(LABEL,    11).
+-define(MOVE_XX,  0).
+-define(MOVE_XY,  1).
+-define(MOVE_YX,  2).
+-define(LOAD,     3).
+-define(FUNC,     4).
+-define(ADD,      5).
+-define(DIVIDE,   6).
+-define(MULTIPLY, 7).
+-define(SUBTRACT, 8).
+-define(RETURN,   9).
+-define(JUMP,     10).
+-define(BRT,      11).
+-define(CALL,     12).
+-define(LABEL,    13).
 -define(EQ,       20).
 -define(NEQ,      21).
 -define(LT,       22).
@@ -52,7 +57,9 @@ gen_constant(Str) when length(Str) < 255 ->
 -define(gen_code(M,E),gen_code([M|T],Constants) -> [E | gen_code(T,Constants)]).
 
 ?gen_code({load,C,D},         ?iABC(?LOAD,    ?C(C),   ?X(D),   0     ));
-?gen_code({move,S,D},         ?iABC(?MOVE,    ?X(S),   ?X(D),   0     ));
+?gen_code({move,{x,S},{x,D}}, ?iABC(?MOVE_XX, S,       D,       0     ));
+?gen_code({move,{x,S},{y,D}}, ?iABC(?MOVE_XY, S,       D,       0     ));
+?gen_code({move,{y,S},{x,D}}, ?iABC(?MOVE_YX, S,       D,       0     ));
 ?gen_code({return},           ?iABC(?RETURN,  0,       0,       0     ));
 ?gen_code({func,N,A},         ?iABC(?FUNC,    ?C(N),   A,       0     ));
 ?gen_code({add,L,R,D},        ?iABC(?ADD,     ?X(L),   ?X(R),   ?X(D) ));
@@ -60,8 +67,8 @@ gen_constant(Str) when length(Str) < 255 ->
 ?gen_code({subtract,L,R,D},   ?iABC(?SUBTRACT,?X(L),   ?X(R),   ?X(D) ));
 ?gen_code({divide,L,R,D},     ?iABC(?DIVIDE,  ?X(L),   ?X(R),   ?X(D) ));
 ?gen_code({jump,Lbl},         ?iABx(?JUMP,    0,       Lbl            ));
-?gen_code({test,Test,Lbl},    ?iABx(?TEST,    ?X(Test),?C(Lbl)        ));
-?gen_code({call,N,A},         ?iABC(?TEST,    ?C(N),   A,       0     ));
+?gen_code({brt,Test,Lbl},     ?iABx(?BRT,     ?X(Test),?C(Lbl)        ));
+?gen_code({call,N,A,L},       ?iABC(?CALL,    ?C(N),   A,       L     ));
 ?gen_code({label,Lbl},        ?iABx(?LABEL,   0,       Lbl            ));
 ?gen_code({eq,L,R,D},         ?iABC(?EQ,      ?X(L),   ?X(R),   ?X(D) ));
 ?gen_code({neq,L,R,D},        ?iABC(?NEQ,     ?X(L),   ?X(R),   ?X(D) ));

@@ -48,11 +48,17 @@ Enc: iABC
 
 A jump label which a test intruction can jump to.
 
-Enc: iABC, 
+Enc: iABx, 
 
 ## {brt, Test, FalseLabel}
 
 A branching test instruction which jumps to `FalseLabel` if `Test` is 0, and continues executing the next instruction otherwise.
+
+Enc: iABx, Bx contains a signed PC offset
+
+## {jump, Label}
+
+An unconditional jump to the specified label. This instruction could be deleted and `brt` with Test set to 0 could be used.
 
 Enc: iABx, Bx contains a signed PC offset
 
@@ -72,11 +78,27 @@ Enc: iABC
 
 Stores 1 in `Dest` if `Left` == `Right`, 0 otherwise.
 
+## {neq, Left, Right, Dest}
+
+Stores 1 in `Dest` if `Left` != `Right`, 0 otherwise.
+
 Enc: iABC
 
-## {move, Source, Dest}
+## {move_xx, Source, Dest}
 
-Copies the value of register `Source` to `Dest`. Both `Source` and `Dest` can be an x or y register.
+Copies the value of x register `Source` to x register `Dest`. 
+
+Enc: iABC
+
+## {move_xy, Source, Dest}
+
+Copies the value of x register `Source` to y register `Dest`. 
+
+Enc: iABC
+
+## {move_yx, Source, Dest}
+
+Copies the value of y register `Source` to x register `Dest`. 
 
 Enc: iABC
 
@@ -104,7 +126,7 @@ Stores 1 in `Dest` if the `Source` is a number.
 
 Enc: iABC
 
-## {is__nil, Source, Dest}
+## {is_nil, Source, Dest}
 
 Stores 1 in `Dest` if the `Source` is a nil.
 

@@ -51,7 +51,8 @@ generate({call,Name,Params},S) ->
     %% Update variable references
     NewVars = [{VName,R+1} || {VName,R} <- S#s.vars],
     {[YMoves,[PHS || {PHS,_} <- PHS],
-      Regs,{call,Name,length(Params)},YRestores],S#s{ vars = NewVars },0};
+      Regs,{call,Name,length(Params),length(YMoves)},YRestores],
+     S#s{ vars = NewVars },0};
 generate({variable,V},S) ->
     {[],S,proplists:get_value(V,S#s.vars)};
 generate({'if',Test,T,F},S) ->
@@ -65,7 +66,7 @@ generate({'if',Test,T,F},S) ->
     {FHS,_FHSS,FHSReg} = generate(F,LabelS),
     %% Create label where true and false branch will join again
     {JoinLabel,JoinLabelS} = next_label(LabelS),
-    {[TestHS,{test,{x,TestHSReg},FalseLabel},
+    {[TestHS,{brt,{x,TestHSReg},FalseLabel},
       THS,{move,{x,THSReg},{x,TestHSReg}},{jump,JoinLabel},
       {label,FalseLabel},FHS,{move,{x,FHSReg},{x,TestHSReg}},
       {label,JoinLabel}],
