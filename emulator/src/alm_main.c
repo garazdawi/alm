@@ -17,7 +17,7 @@ int parse_args(char** cmdline, ATERM *args,int *arg_len) {
   while (*arg_len < 10 &&
 	  (str = strsep(cmdline, ",)")) != NULL) {
     sscanf(str,"%d",&arg);
-    *(args+*arg_len) = (ATERM)arg;
+    *(args+*arg_len) = mk_num((double)arg);
     (*arg_len)++;
   }
   return 0;

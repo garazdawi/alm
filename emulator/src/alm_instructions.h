@@ -10,33 +10,39 @@
 
 #include <stdint.h>
 
-#define INSTR_COUNT 8
+#define INSTR_COUNT 24
 
-#define I_MOVE      0
-#define I_LOAD      1
-#define I_FUNC      2
-#define I_ADD       3
-#define I_DIV       4
-#define I_MUL       5
-#define I_SUB       6
-#define I_RET       7
+#define I_MOVE_XX   0
+#define I_MOVE_XY   1
+#define I_MOVE_YX   2
+#define I_LOAD      3
+#define I_FUNC      4
+#define I_ADD       5
+#define I_DIV       6
+#define I_MUL       7
+#define I_SUB       8
+#define I_RET       9
+#define I_JUMP      10
+#define I_BRT       11
+#define I_CALL      12
+#define I_LABEL     13
+#define I_EQ        20
+#define I_NEQ       21
+#define I_LT        22
+#define I_GT        23
 
 #define INSTR_iABC 0
 #define INSTR_iABx 1
 
-static const char* instruction_to_string[] = { "move", "load", "func", "add", "div",
-	"mul", "sub", "ret" };
-static const int instruction_type[] = { INSTR_iABC, INSTR_iABC, INSTR_iABC, INSTR_iABC,
-	INSTR_iABC, INSTR_iABC, INSTR_iABC, INSTR_iABC };
-
-#define I_MOVE_ENC      INSTR_iABC
-#define I_LOAD_ENC      INSTR_iABC
-#define I_FUNC_ENC      INSTR_iABC
-#define I_ADD_ENC       INSTR_iABC
-#define I_DIV_ENC       INSTR_iABC
-#define I_MUL_ENC       INSTR_iABC
-#define I_SUB_ENC       INSTR_iABC
-#define I_RET_ENC       INSTR_iABC
+static const char* instruction_to_string[] =
+	{ "move_xx", "move_xy", "move_yx", "load", "func", "add", "div", "mul",
+		"sub", "ret", "jmp", "brt", "call", "lbl", NULL, NULL, NULL,
+		NULL, NULL, NULL, "eq", "neq", "lt", "gt" };
+static const int instruction_type[] = { INSTR_iABC, INSTR_iABC, INSTR_iABC,
+	INSTR_iABC, INSTR_iABC, INSTR_iABC, INSTR_iABC, INSTR_iABC, INSTR_iABC,
+	INSTR_iABC, INSTR_iABx, INSTR_iABx, INSTR_iABC, INSTR_iABx, INSTR_iABC,
+	INSTR_iABC, INSTR_iABC, INSTR_iABC, INSTR_iABC, INSTR_iABC, INSTR_iABC,
+	INSTR_iABC, INSTR_iABC, INSTR_iABC };
 
 #ifndef INSTR_FIRST
 #define GET_INSTR(IP) (*(IP)) >> 26

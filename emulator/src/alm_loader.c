@@ -20,14 +20,13 @@ int load_constants(char **filebuf, code_t *new_code) {
     new_code->constants = malloc(sizeof(ATERM)*new_code->num_constants);
     (*filebuf) += 4;
 
-
     for (i = 0; i < new_code->num_constants; i++) {
+	char type = *((*filebuf)++);
 	int size = *((*filebuf)++);
-	if (size == 4)
-	    new_code->constants[i] = (ATERM)get_int32(*filebuf);
-	else
-	    new_code->constants[i] = (ATERM)0.0;
-
+	if (type == 0)
+	    new_code->constants[i] = mk_num((double)get_int32(*filebuf));
+	else if (type == 1)
+	    new_code->constants[i] = mk_num((double)0.0);
 	(*filebuf) += size;
     }
 
@@ -38,7 +37,7 @@ int load_instructions(char **filebuf, code_t *new_code) {
     int i;
 
     new_code->num_instructions = get_int32(*filebuf);
-    new_code->instructions = malloc(sizeof(uint32_t)*new_code->num_instructions);
+    new_code->instructions = malloc(sizeof(INSTR)*new_code->num_instructions);
     (*filebuf) += 4;
 
     for (i = 0; i < new_code->num_instructions; i++) {
