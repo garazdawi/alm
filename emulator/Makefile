@@ -9,7 +9,7 @@ alm: $(OBJ_DIR) $(OBJ)
 	gcc -g -o $@ $(OBJ)
 
 .obj/%.o: src/%.c $(H_FILES)
-	gcc -g -c -werror -Isrc -o $@ $<
+	gcc -g -c -Werror -Isrc -o $@ $<
 
 $(OBJ_DIR):
 	mkdir -p $@
