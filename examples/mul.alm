@@ -1,6 +1,6 @@
 def add3(a,b) {
     if (b == 0) a;
-    else b + add3(a,b-1);
+    else a + add3(a,b-1);
 }
 
 def mul(a,b) {

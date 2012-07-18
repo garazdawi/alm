@@ -45,11 +45,12 @@ static const int instruction_type[] = { INSTR_iABC, INSTR_iABC, INSTR_iABC,
 	INSTR_iABC, INSTR_iABC, INSTR_iABC };
 
 #ifndef INSTR_FIRST
-#define GET_INSTR(IP) (*(IP)) >> 26
-#define GET_A(I) (I >> 18) & ((1 << 8) - 1)
-#define GET_B(I) (I >> 9) & ((1 << 9) - 1)
-#define GET_C(I) I & ((1 << 9) - 1)
-#define GET_Bx(I) I & ((1 << 18) -1)
+#define GET_INSTR(IP) ((*(IP)) >> 26)
+#define GET_A(I) (((I) >> 18) & ((1 << 8) - 1))
+#define GET_B(I) (((I) >> 9) & ((1 << 9) - 1))
+#define GET_C(I) ((I) & ((1 << 9) - 1))
+#define GET_Bx(I) ((I) & ((1 << 18) - 1))
+#define SET_Bx(I, val) I = (((I) | ((1 << 18) - 1)) & (val | 0xFFFC0000))
 #else
 #define GET_INSTR(IP) (*(IP)) & ((1 << 6) - 1)
 #define GET_A(I) (I >> 6) & ((1 << 8) - 1)

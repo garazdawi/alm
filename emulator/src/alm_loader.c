@@ -17,7 +17,7 @@ int load_constants(char **filebuf, code_t *new_code) {
     int i;
 
     new_code->num_constants = get_int32(*filebuf);
-    new_code->constants = malloc(sizeof(ATERM)*new_code->num_constants);
+    new_code->constants = malloc(sizeof(ATERM) * new_code->num_constants);
     (*filebuf) += 4;
 
     for (i = 0; i < new_code->num_constants; i++) {
@@ -34,22 +34,56 @@ int load_constants(char **filebuf, code_t *new_code) {
 }
 
 int load_instructions(char **filebuf, code_t *new_code) {
-    int i;
+    int i, j, A, B, C;
 
+    new_code->func_list = NULL;
     new_code->num_instructions = get_int32(*filebuf);
-    new_code->instructions = malloc(sizeof(INSTR)*new_code->num_instructions);
+    new_code->instructions = malloc(sizeof(INSTR) * new_code->num_instructions);
     (*filebuf) += 4;
 
     for (i = 0; i < new_code->num_instructions; i++) {
 	new_code->instructions[i] = get_int32(*filebuf);
+	// Do a small sanity check
 	if (GET_INSTR(new_code->instructions+i) < 0 ||
-		GET_INSTR(new_code->instructions+i) >= INSTR_COUNT) {
-	    // Do a small sanity check
-	    printf("Encountered invalid instruction 0x%X\r\n",new_code->instructions[i]);
+	GET_INSTR(new_code->instructions+i) >= INSTR_COUNT) {
+
+	    printf("Encountered invalid instruction 0x%X\r\n",
+		    new_code->instructions[i]);
 	    exit(1);
 	}
+	switch (GET_INSTR(new_code->instructions+i)) {
+		    case I_FUNC: {
+			GET_iABC(new_code->instructions+i,A,B,C);
+			function_t *func = malloc(sizeof(function_t));
+			func->constant = A;
+			func->instruction = new_code->instructions+i;
+			func->next = new_code->func_list;
+			new_code->func_list = func;
+			break;
+		    }
+		    default:
+		    break;
+		}
 	(*filebuf) += 4;
     }
+
+    for (i = 0; i < new_code->num_instructions; i++) {
+
+	switch (GET_INSTR(new_code->instructions+i)) {
+		    case I_BRT :
+		    case I_JUMP: {
+			GET_iABx(new_code->instructions+i,A,B);
+			for (j = 0; j < new_code->num_instructions; j++)
+			    if (GET_INSTR(new_code->instructions+j) == I_LABEL &&
+				    GET_Bx(new_code->instructions[j]) == B)
+				SET_Bx(new_code->instructions[i],j-i);
+			break;
+		    }
+		    default:
+		    break;
+		}
+		(*filebuf) += 4;
+	    }
 
     return 0;
 }
@@ -71,13 +105,13 @@ int load(code_t *new_code, char *filename) {
     CHK(read(fd, filebuf, st.st_size) == -1);
 
     if (strncmp(filebuf, "alm", 3) != 0) {
-        printf("File is not an alm file\r\n");
-        return -1;
+	printf("File is not an alm file\r\n");
+	return -1;
     }
     filebuf += 3;
     if (get_int32(filebuf) != 1) {
-        printf("File is not the correct alm version\r\n");
-        return -1;
+	printf("File is not the correct alm version\r\n");
+	return -1;
     }
     filebuf += 4;
     CHK(load_constants(&filebuf,new_code) != 0);
@@ -85,7 +119,7 @@ int load(code_t *new_code, char *filename) {
     free(fileptr);
 
 #ifdef DEBUG
-    printf("Loaded new code from %s:\r\n",filename);
+    printf("Loaded new code from %s:\r\n", filename);
     alm_disasm(new_code);
 #endif
 

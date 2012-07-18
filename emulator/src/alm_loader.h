@@ -19,6 +19,7 @@ typedef struct code {
     int num_constants, num_instructions;
     ATERM *constants;
     INSTR *instructions;
+    function_t *func_list;
 } code_t;
 
 int load(code_t *new_code, char *filename);
