@@ -11,10 +11,10 @@ main(Args) ->
             end,
             case proplists:get_value(expression, Options) of
                 undefined ->
-		    [compile_file(Options, File) || File <- Files];
-                Exp       ->
-		    {_, Result} = scan_and_parse(Options, Exp),
-		    io:format("~p~n", [Result])
+                    [compile_file(Options, File) || File <- Files];
+                Exp ->
+                    {_, Result} = scan_and_parse(Options, Exp),
+                    io:format("~p~n", [Result])
             end;
         {error, {invalid_option, Option}} ->
             io:format("error: invalid option: ~s~n", [Option]), halt(1)
@@ -39,10 +39,10 @@ options() ->
 compile_file(Options, File) ->
     {ok, Bin} = file:read_file(File),
     case scan_and_parse(Options, binary_to_list(Bin)) of
-	{bytecode,ByteCode} ->
-	    file:write_file(filename:rootname(File)++".alb",ByteCode);
-	{_,Result} ->
-	    io:format("~p~n", [Result])
+        {bytecode,ByteCode} ->
+            file:write_file(filename:rootname(File)++".alb",ByteCode);
+        {_,Result} ->
+            io:format("~p~n", [Result])
     end.
 
 scan_and_parse(Options, String) ->
@@ -55,7 +55,7 @@ scan_and_parse(Options, String) ->
                      fun() -> alm_compiler:generate(AST) end),
         BC     = run(Options, bytecode_only,
                      fun() -> alm_bytecode:generate(ASM) end),
-	{bytecode,BC}
+        {bytecode,BC}
     catch
         throw:Result ->
             Result
