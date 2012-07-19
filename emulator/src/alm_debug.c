@@ -14,7 +14,13 @@ int alm_disasm(code_t* code) {
 
     printf("Constants: %d\r\n", code->num_constants);
     for (i = 0; i < code->num_constants; i++) {
-	printf("  const[%d] : %lf\r\n", i, num_val(code->constants[i]));
+	if (is_num(code->constants[i]))
+	    printf("  const[%d] : %lf\r\n", i, num_val(code->constants[i]));
+	else if (is_boxed(code->constants[i])) {
+	    ATERM box = *boxed_val(code->constants[i]);
+	    if (is_atom(box))
+		printf("  const[%d] : %.*s\r\n",i,atom_size(box),(char*)(boxed_val(code->constants[i])+1));
+	}
     }
 
     printf("Instructions: %d\r\n", code->num_instructions);

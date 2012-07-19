@@ -22,11 +22,15 @@ int load_constants(char **filebuf, code_t *new_code) {
 
     for (i = 0; i < new_code->num_constants; i++) {
 	char type = *((*filebuf)++);
-	int size = *((*filebuf)++);
+	uint64_t size = *((*filebuf)++);
 	if (type == 0)
 	    new_code->constants[i] = mk_num((double)get_int32(*filebuf));
-	else if (type == 1)
-	    new_code->constants[i] = mk_num((double)0.0);
+	else if (type == 1) {
+	    ATERM *atom = malloc(sizeof(ATERM)+sizeof(char)*size);
+	    new_code->constants[i] = mk_boxed(atom);
+	    *atom = mk_atom(size);
+	    strncpy((char*)(atom+1),*filebuf,size);
+	}
 	(*filebuf) += size;
     }
 
