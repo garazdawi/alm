@@ -26,10 +26,7 @@ int load_constants(char **filebuf, code_t *new_code) {
 	if (type == 0)
 	    new_code->constants[i] = mk_num((double)get_int32(*filebuf));
 	else if (type == 1) {
-	    ATERM *atom = malloc(sizeof(ATERM)+sizeof(char)*size);
-	    new_code->constants[i] = mk_boxed(atom);
-	    *atom = mk_atom(size);
-	    strncpy((char*)(atom+1),*filebuf,size);
+	    mk_atom(new_code->constants[i],*filebuf,size);
 	}
 	(*filebuf) += size;
     }

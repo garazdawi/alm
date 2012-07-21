@@ -19,7 +19,7 @@ int alm_disasm(code_t* code) {
 	else if (is_boxed(code->constants[i])) {
 	    ATERM box = *boxed_val(code->constants[i]);
 	    if (is_atom(box))
-		printf("  const[%d] : %.*s\r\n",i,atom_size(box),(char*)(boxed_val(code->constants[i])+1));
+		printf("  const[%d] : %.*s\r\n",i,(int)atom_size(box),(char*)(boxed_val(code->constants[i])+1));
 	}
     }
 

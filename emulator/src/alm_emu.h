@@ -11,6 +11,6 @@
 #include "alm_loader.h"
 #include "alm_term.h"
 
-int process_main(code_t *code, ATERM *args, int arg_len);
+int process_main(code_t *code, ATERM funcname, ATERM *args, int arg_len);
 
 #endif /* ALM_EMU_H_ */

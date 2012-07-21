@@ -37,7 +37,14 @@ typedef union { uint64_t bin; double num; } ATERM;
 
 /* A boxed atom */
 #define is_atom(x) (((x).bin >> 47) == 1)
-#define mk_atom(x) (ATERM)((mk_non_num((uint64_t)x)).bin | 0x0000800000000000)
+#define tag_atom(x) (ATERM)((mk_non_num((uint64_t)x)).bin | 0x0000800000000000)
+#define mk_atom(aterm,str,len) \
+    do {\
+	ATERM *atom = malloc(sizeof(ATERM)+sizeof(char)*(len)); \
+	*atom = tag_atom(len); \
+	strncpy((char*)(atom+1),(str),(len));\
+	aterm = mk_boxed(atom); \
+    } while(0)
 #define atom_size(x) ((x).bin & 0x00007FFFFFFFFFFF)
 
 
