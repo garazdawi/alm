@@ -2,11 +2,14 @@ all: almc
 
 .PHONY: almc compile
 
-almc:
+almc: get-deps
 	@rebar compile escriptize
 
-compile:
+compile: get-deps
 	@rebar compile
+
+get-deps:
+	@rebar get-deps
 
 test: almc
 	@PATH=`pwd`:$$PATH rebar ct skip_deps=true
