@@ -19,6 +19,9 @@ else : {token,{else,TokenLine}}.
 {O}  : {token,{list_to_atom(TokenChars),TokenLine}}.
 {D}+ : {token,{integer,TokenLine,TokenChars}}.
 ,    : {token,{',',TokenLine}}.
+\[    : {token,{'[',TokenLine}}.
+\]    : {token,{']',TokenLine}}.
+\|    : {token,{'|',TokenLine}}.
 {S}+ : skip_token.
 
 Erlang code.

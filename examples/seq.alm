@@ -1,0 +1,4 @@
+def list(n) {
+    if (n == 0) [];
+    else [n|list(n-1)];
+}

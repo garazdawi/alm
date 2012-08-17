@@ -29,6 +29,11 @@ generate({func,Name,Args,Body},S) ->
 generate({integer,Num},S) ->
     {Reg,NewS} = next_reg(S),
     {[{load,Num,{x,Reg}}],NewS,Reg};
+generate(nil,S) ->
+    {Reg,NewS} = next_reg(S),
+    {[{load,nil,{x,Reg}}],NewS,Reg};
+generate({variable,V},S) ->
+    {[],S,proplists:get_value(V,S#s.vars)};
 generate({call,Name,Params},S) ->
     %% Push all live vars to stack
     YMoves = [{move,{x,R},{y,R}} || {_,R} <- S#s.vars],
@@ -53,8 +58,6 @@ generate({call,Name,Params},S) ->
     {[YMoves,[PHS || {PHS,_} <- PHS],
       Regs,{call,Name,length(Params),length(YMoves)},YRestores],
      S#s{ vars = NewVars },0};
-generate({variable,V},S) ->
-    {[],S,proplists:get_value(V,S#s.vars)};
 generate({'if',Test,T,F},S) ->
     %% Generate test instructions
     {TestHS,TestHSS,TestHSReg} = generate(Test,S),
@@ -73,7 +76,7 @@ generate({'if',Test,T,F},S) ->
      JoinLabelS,TestHSReg};
 generate({Op,L,R},S) 
   when Op == add; Op == divide; Op == multiply; Op == subtract; 
-       Op == eq; Op == neq; Op == lt; Op == gt ->
+       Op == eq; Op == neq; Op == lt; Op == gt; Op == cons ->
     {RHS,RHSS,RHSReg} = generate(R,S),
     {LHS,LHSS,LHSReg} = generate(L,RHSS),
     {Reg,NewS} = next_reg(LHSS),

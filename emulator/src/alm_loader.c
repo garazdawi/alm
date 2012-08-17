@@ -23,10 +23,16 @@ int load_constants(char **filebuf, code_t *new_code) {
     for (i = 0; i < new_code->num_constants; i++) {
 	char type = *((*filebuf)++);
 	uint64_t size = *((*filebuf)++);
-	if (type == 0)
+	switch (type) {
+	case 0:
 	    new_code->constants[i] = mk_num((double)get_int32(*filebuf));
-	else if (type == 1) {
-	    mk_atom(new_code->constants[i],*filebuf,size);
+	    break;
+	case 1:
+	    mk_atom(new_code->constants[i], *filebuf, size);
+	    break;
+	case 2:
+	    new_code->constants[i] = mk_nil();
+	    break;
 	}
 	(*filebuf) += size;
     }
@@ -52,39 +58,39 @@ int load_instructions(char **filebuf, code_t *new_code) {
 		    new_code->instructions[i]);
 	    exit(1);
 	}
-	switch (GET_INSTR(new_code->instructions+i)) {
-		    case I_FUNC: {
-			GET_iABC(new_code->instructions+i,A,B,C);
-			function_t *func = malloc(sizeof(function_t));
-			func->constant = A;
-			func->instruction = new_code->instructions+i;
-			func->next = new_code->func_list;
-			new_code->func_list = func;
-			break;
-		    }
-		    default:
-		    break;
-		}
+	switch(GET_INSTR(new_code->instructions+i)) {
+	    case I_FUNC: {
+		GET_iABC(new_code->instructions+i,A,B,C);
+		function_t *func = malloc(sizeof(function_t));
+		func->constant = A;
+		func->instruction = new_code->instructions+i;
+		func->next = new_code->func_list;
+		new_code->func_list = func;
+		break;
+	    }
+	    default:
+	    break;
+	}
 	(*filebuf) += 4;
     }
 
     for (i = 0; i < new_code->num_instructions; i++) {
 
-	switch (GET_INSTR(new_code->instructions+i)) {
-		    case I_BRT :
-		    case I_JUMP: {
-			GET_iABx(new_code->instructions+i,A,B);
-			for (j = 0; j < new_code->num_instructions; j++)
-			    if (GET_INSTR(new_code->instructions+j) == I_LABEL &&
-				    GET_Bx(new_code->instructions[j]) == B)
-				SET_Bx(new_code->instructions[i],j-i);
-			break;
-		    }
-		    default:
-		    break;
-		}
-		(*filebuf) += 4;
+	switch(GET_INSTR(new_code->instructions+i)) {
+	    case I_BRT :
+	    case I_JUMP: {
+		GET_iABx(new_code->instructions+i,A,B);
+		for (j = 0; j < new_code->num_instructions; j++)
+		if (GET_INSTR(new_code->instructions+j) == I_LABEL &&
+			GET_Bx(new_code->instructions[j]) == B)
+		SET_Bx(new_code->instructions[i],j-i);
+		break;
 	    }
+	    default:
+	    break;
+	}
+	(*filebuf) += 4;
+    }
 
     return 0;
 }

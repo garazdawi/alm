@@ -44,6 +44,7 @@ case I_CALL: {
     break;
 }
 case I_LABEL: I++; continue;
+iABC_CASE(I_CONS,CONS(reg_x[C],reg_x[A],reg_x[B]))
 iABC_CASE(I_ADD,reg_x[C] = mk_num(num_val(reg_x[A]) + num_val(reg_x[B])))
 iABC_CASE(I_SUB,reg_x[C] = mk_num(num_val(reg_x[A]) - num_val(reg_x[B])))
 iABC_CASE(I_MUL,reg_x[C] = mk_num(num_val(reg_x[A]) * num_val(reg_x[B])))
@@ -59,7 +60,7 @@ iABC_CASE(I_GT,reg_x[C] = mk_num((double)(num_val(reg_x[A]) > num_val(reg_x[B]))
 		}
 	for (i=0;i<5;i++)
 	    if (reg_x[i].bin != 0)
-		printf("%-6.1f ",num_val(reg_x[i]));
+		alm_printf("%T ",reg_x[i]);
 	    else
 		printf("N/A    ");
 	printf("\r\n");

@@ -9,11 +9,14 @@
 #define ALM_TERM_H_
 
 #include <stdint.h>
+#include "alm_mem.h"
 
 typedef union { uint64_t bin; double num; } ATERM;
 
+// All primary data types
+
 #define mk_non_num(x) (ATERM)(((ATERM)(x)).bin & 0x000FFFFFFFFFFFFF)
-#define is_not_number(x) (((((x).bin) & 0x7FF0000000000000) == 0) && (x).bin > 2 )
+#define is_not_number(x) (((((x).bin) & 0x7FF0000000000000) == 0) && (x).bin > 1 )
 
 /* all number are doubles */
 #define is_num(x) (((((x).bin) & 0x7FF0000000000000) != 0) || (x).bin < 2 )
@@ -21,9 +24,27 @@ typedef union { uint64_t bin; double num; } ATERM;
 #define num_val(x) (mk_num(x)).num
 
 /* header word used to tag a pointer on stack or a boxed something on heap */
-#define is_header(x) ((x).bin > 1 && ((x).bin >> 48) == 0)
+#define is_header(x) (((x).bin >> 48) == 0 && (x).bin > 1)
 #define mk_header(x) (ATERM)((mk_non_num((uint64_t)x)).bin & 0x0000FFFFFFFFFFFF)
 #define header_val(x) (x).bin
+
+/* nil */
+#define is_nil(x) (((x).bin >> 48) == 2 && (x).bin > 1)
+#define mk_nil()  (ATERM)(uint64_t)0x0002000000000000LL
+
+/* cons cell */
+#define is_cons(x) (((x).bin >> 48) == 3 && (x).bin > 1)
+#define mk_cons(x) (ATERM)((mk_non_num((uint64_t)x)).bin | 0x0003000000000000)
+#define cons_ptr(x) ((ATERM*)((x).bin & 0x0000FFFFFFFFFFFF))
+#define CONS(aterm, head, tail) \
+    do { \
+	ATERM *cell = Halloc(sizeof(ATERM)*2); \
+	cell[0] = head; \
+	cell[1] = tail; \
+	aterm = mk_cons(cell);\
+    } while(0);
+#define CAR(x) (*(cons_ptr(x)))
+#define CDR(x) (*(cons_ptr(x)+1))
 
 /* Stack frames pushed to stack on function call */
 #define is_frame(x) is_header(x)
@@ -31,16 +52,18 @@ typedef union { uint64_t bin; double num; } ATERM;
 #define frame_val(x) header_val(x)
 
 /* Pointer to a boxed datatype, i.e. atom, list etc */
-#define is_boxed(x) (((x).bin >> 48) == 1)
+#define is_boxed(x) (((x).bin >> 48) == 1 && (x).bin > 1)
 #define mk_boxed(x) (ATERM)((mk_non_num((uint64_t)x)).bin | 0x0001000000000000)
-#define boxed_val(x) ((ATERM*)((x).bin & 0x0000FFFFFFFFFFFF))
+#define boxed_ptr(x) ((ATERM*)((x).bin & 0x0000FFFFFFFFFFFF))
+
+// All boxed data types
 
 /* A boxed atom */
-#define is_atom(x) (((x).bin >> 47) == 1)
-#define tag_atom(x) (ATERM)((mk_non_num((uint64_t)x)).bin | 0x0000800000000000)
+#define is_atom(x) (is_header(x) && ((x).bin >> 47) == 1)
+#define tag_atom(x) (ATERM)((mk_header(x)).bin | 0x0000800000000000)
 #define mk_atom(aterm,str,len) \
     do {\
-	ATERM *atom = malloc(sizeof(ATERM)+sizeof(char)*(len)); \
+	ATERM *atom = Halloc(sizeof(ATERM)+sizeof(char)*(len)); \
 	*atom = tag_atom(len); \
 	strncpy((char*)(atom+1),(str),(len));\
 	aterm = mk_boxed(atom); \

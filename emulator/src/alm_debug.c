@@ -12,6 +12,26 @@
 #include "alm_debug.h"
 #include "alm_instructions.h"
 
+int alm_print_term(ATERM t) {
+    int count = 0;
+    if (is_num(t))
+	count += printf("%lf", num_val(t));
+    else if (is_nil(t))
+	count += printf("[]");
+    else if (is_cons(t)) {
+	count += printf("[");
+	count += alm_print_term(CAR(t));
+	count += printf("|");
+	count += alm_print_term(CDR(t));
+	count += printf("]");
+    } else if (is_boxed(t)) {
+	ATERM *box = boxed_ptr(t);
+	if (is_atom(*box))
+	    count += printf("%.*s", (int) atom_size(*box), (char*) (box + 1));
+    }
+    return count;
+}
+
 int alm_printf(char *format, ...) {
     va_list argp;
     int count = 0;
@@ -20,21 +40,13 @@ int alm_printf(char *format, ...) {
 
     va_start(argp, format);
 
-    for(f = p = s; *p != '\0'; p++)
-    {
+    for (f = p = s; *p != '\0'; p++) {
 	if (p[0] == '%') {
 	    if (p[1] == 'T') {
 		p[0] = '\0';
 		count += vprintf(f, argp);
 		t = va_arg(argp, ATERM);
-		if (is_num(t))
-		    count += printf("%lf", num_val(t));
-		else if (is_boxed(t)) {
-		    ATERM box = *boxed_val(t);
-		    if (is_atom(box))
-			count += printf("%.*s", (int) atom_size(box),
-				(char*) (boxed_val(t) + 1));
-		}
+		alm_print_term(t);
 		p += 2;
 		f = p;
 	    }

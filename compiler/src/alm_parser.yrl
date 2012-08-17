@@ -1,5 +1,5 @@
 Nonterminals Functions Function Statement Expression Operator Params Param.
-Terminals def identifier '(' ')' '{' '}' '+' '-' '*' '/' ';' ',' integer 'if' else eq lt gt neq.
+Terminals def identifier '(' ')' '{' '}' '+' '-' '*' '/' ';' ',' integer 'if' else eq lt gt neq '[' '|' ']'.
 Rootsymbol Functions.
 
 Left 100 '-'.
@@ -26,6 +26,8 @@ Expression -> 'if' '(' Expression ')' Expression ';' else Expression :
 		 {'if','$3','$5','$8'}.
 Expression -> 'if' '(' Expression ')' Expression : {'if','$3','$5'}.
 Expression -> '(' Expression ')' : '$2'.
+Expression -> '[' Expression '|' Expression ']' : {cons, '$2','$4'}.
+Expression -> '[' ']' : nil.
 Expression -> Expression Operator Expression : {'$2','$1','$3'}.
 Expression -> integer : {integer,list_to_integer(unwrap('$1'))}.
 Expression -> identifier : {variable,unwrap('$1')}.
