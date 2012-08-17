@@ -65,7 +65,7 @@ iABC_CASE(I_GT,reg_x[C] = mk_num((double)(num_val(reg_x[A]) > num_val(reg_x[B]))
 	printf("\r\n");
     }
     done:
-       printf("\r\n%lf\r\n",num_val(reg_x[0]));
+       alm_printf("\r\n%T\r\n",reg_x[0]);
        return 0;
 
     return 0;
