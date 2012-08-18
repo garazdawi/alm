@@ -7,13 +7,17 @@
 int process_main(code_t* code, ATERM funcname, ATERM *args, int arg_len) {
     INSTR *I;
     ATERM *S;
-    ATERM reg_x[32];
+#define NUM_XREG 32
+    ATERM reg_x[NUM_XREG];
     ATERM reg_y[255];
 
     int A, B, C, i;
 
     I = code->instructions;
     S = reg_y;
+
+    for (i = 0; i < NUM_XREG; i++)
+    	reg_x[i] = (ATERM)0ull;
 
     for (i = 0; i < arg_len; i++)
       reg_x[i] = args[i];
@@ -40,6 +44,8 @@ case I_CALL: {
     S += C + 1;
     *S = mk_frame(I);
     I = f->instruction;
+    for (i = B; i < NUM_XREG; i++)
+	reg_x[i] = (ATERM)0ull;
     I++;
     break;
 }
@@ -58,11 +64,11 @@ iABC_CASE(I_GT,reg_x[C] = mk_num((double)(num_val(reg_x[A]) > num_val(reg_x[B]))
 			printf("Instruction %d\r\n",GET_INSTR(I));
 			CHK(1); break;
 		}
-	for (i=0;i<5;i++)
+	for (i=0;i<10;i++)
 	    if (reg_x[i].bin != 0)
 		alm_printf("%T ",reg_x[i]);
 	    else
-		printf("N/A    ");
+		printf("N/A ");
 	printf("\r\n");
     }
     done:
