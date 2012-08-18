@@ -20,9 +20,17 @@ int alm_print_term(ATERM t) {
 	count += printf("[]");
     else if (is_cons(t)) {
 	count += printf("[");
-	count += alm_print_term(CAR(t));
-	count += printf("|");
-	count += alm_print_term(CDR(t));
+	ATERM tmp = t;
+	while (is_cons(tmp)) {
+	    count += alm_print_term(CAR(tmp));
+	    if (is_cons(CDR(tmp))) {
+		count += printf(",");
+	    } else if (!is_nil(CDR(tmp))) {
+		count += printf("|");
+		count += alm_print_term(CDR(tmp));
+	    }
+	    tmp = CDR(tmp);
+	}
 	count += printf("]");
     } else if (is_boxed(t)) {
 	ATERM *box = boxed_ptr(t);
