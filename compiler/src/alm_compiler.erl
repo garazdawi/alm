@@ -5,6 +5,7 @@
 -record(s,{ regs = [], vars = [], funcname, labelcnt = 0 }).
 
 generate(AST) ->
+    put(labelcnt, 0),
     dbg:tracer(),dbg:p(all,c),
     %dbg:tpl(?MODULE,x),
     lists:flatten(generate(AST,#s{})).
@@ -18,7 +19,7 @@ generate([],_) ->
 generate({func,Name,Args,Body},S) ->
     {ArgMap,ArgRegs} = lists:mapfoldl(fun({variable,Arg},RegAcc) ->
 					      N = next_reg(RegAcc),
-					      {{Arg,N},[N|RegAcc]}
+					      {{Arg,{x,N}},[N|RegAcc]}
 				      end,[],Args),
     {BodyGen,BodyS,Reg} = generate(Body,S#s{funcname = Name,
 					     vars = ArgMap,
@@ -33,31 +34,35 @@ generate(nil,S) ->
     {Reg,NewS} = next_reg(S),
     {[{load,nil,{x,Reg}}],NewS,Reg};
 generate({variable,V},S) ->
-    {[],S,proplists:get_value(V,S#s.vars)};
+    case proplists:get_value(V,S#s.vars) of
+	{x,R} ->
+	    {[],S,R};
+	{y,R} ->
+	    {Reg,NewS} = next_reg(S),
+	    {[{move,{y,R},{x,Reg}}],NewS,Reg}
+    end;
 generate({call,Name,Params},S) ->
-    %% Push all live vars to stack
-    YMoves = [{move,{x,R},{y,R}} || {_,R} <- S#s.vars],
     %% Generate all in parameter calculations/calls
-    {PHS,_PHSS} = lists:mapfoldl(
+    {PHSI,PHSS} = lists:mapfoldl(
 		   fun(P,PS) ->
 			   {PHS,PHSS,PHSReg} = generate(P,PS),
 			   {{PHS,PHSReg},PHSS}
 		   end,S,Params),
+    {ResReg,ResRegS} = next_reg(PHSS),
+    YMarshall = [{move,{x,X},{y,X}} || X <- lists:seq(0,ResReg-1)],
+    YUnMarshall = [{move,{y,X},{x,X}} || X <- lists:seq(0,ResReg-1)],
     %% Get return registers from in parameter calculations/calls
     %% and move them to correct register
     {Regs,_} = lists:mapfoldl(
 		 fun({_,Reg},Reg) ->
 			 {[],Reg+1};
 		    ({_,Reg},N) ->
-			 {[{move,{x,Reg},{x,N}}],N+1}
-		 end,0,PHS),
-    %% Pop all live vars from stack at previous position+1
-    YRestores = [{move,{y,R},{x,R+1}} || {_,R} <- S#s.vars],
-    %% Update variable references
-    NewVars = [{VName,R+1} || {VName,R} <- S#s.vars],
-    {[YMoves,[PHS || {PHS,_} <- PHS],
-      Regs,{call,Name,length(Params),length(YMoves)},YRestores],
-     S#s{ vars = NewVars },0};
+			 {[{move,{y,Reg},{x,N}}],N+1}
+		 end,0,PHSI),
+    {[[PHS || {PHS,_} <- PHSI],YMarshall,
+      Regs,{call,Name,length(Params),length(YMarshall)},
+      {move,{x,0},{x,ResReg}},YUnMarshall],
+     ResRegS,ResReg};
 generate({'if',Test,T,F},S) ->
     %% Generate test instructions
     {TestHS,TestHSS,TestHSReg} = generate(Test,S),
@@ -99,5 +104,7 @@ del_regs(S = #s{ regs = Regs, vars = Vars },RegsToDel) ->
     FilteredRegs = [R || R <- RegsToDel,proplists:get_value(R,Vars,false)],
     S#s{ regs = Regs -- FilteredRegs }.
 
-next_label(S = #s{ labelcnt = N }) ->
-    {N,S#s{ labelcnt = N + 1}}.
+next_label(S = #s{ }) ->
+    N = get(labelcnt),
+    put(labelcnt,N+1),
+    {N,S}.

@@ -72,7 +72,7 @@ gen_constant(Str) when length(Str) < 255 ->
 ?gen_code({subtract,L,R,D},   ?iABC(?SUBTRACT,?X(L),   ?X(R),   ?X(D) ));
 ?gen_code({return},           ?iABC(?RETURN,  0,       0,       0     ));
 ?gen_code({jump,Lbl},         ?iABx(?JUMP,    0,       Lbl            ));
-?gen_code({brt,Test,Lbl},     ?iABx(?BRT,     ?X(Test),?C(Lbl)        ));
+?gen_code({brt,Test,Lbl},     ?iABx(?BRT,     ?X(Test),Lbl            ));
 ?gen_code({call,N,A,L},       ?iABC(?CALL,    ?C(N),   A,       L     ));
 ?gen_code({label,Lbl},        ?iABx(?LABEL,   0,       Lbl            ));
 ?gen_code({cons,L,R,D},       ?iABC(?CONS,    ?X(L),   ?X(R),   ?X(D) ));

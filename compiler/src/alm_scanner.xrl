@@ -16,8 +16,8 @@ else : {token,{else,TokenLine}}.
 >    : {token,{gt,TokenLine}}.
 !=   : {token,{neq,TokenLine}}.
 {L}{LD}* : {token,{identifier,TokenLine,TokenChars}}.
-{O}  : {token,{list_to_atom(TokenChars),TokenLine}}.
 {D}+ : {token,{integer,TokenLine,TokenChars}}.
+{O}  : {token,{list_to_atom(TokenChars),TokenLine}}.
 ,    : {token,{',',TokenLine}}.
 \[    : {token,{'[',TokenLine}}.
 \]    : {token,{']',TokenLine}}.
