@@ -1,0 +1,26 @@
+
+def mandelbrot(width,height,iters) {
+    mandelbrot_start(width/2,height/2,iters);
+}
+
+def mandelbrot_calc(x,y,z,zi,iters,i) {
+    if (((z*z)+(zi*zi)) > 4) i;
+    else if(iters == i) 0;
+    else mandelbrot_calc(x,y,(z*z)-(zi*zi) + x,2*z*zi + y,iters,i+1);
+}
+
+def mandelbrot_r(x,y,yend,iters,rows) {
+    if (y == yend) rows;
+    else mandelbrot_r(x,y-1,yend,iters,
+    	 [mandelbrot_calc(x,y,0,0,iters,0)|rows]);
+}
+
+def mandelbrot_c(x,xend,ystart,yend,iters,cols) {
+    if (x == xend) cols;
+    else mandelbrot_c(x-1,xend,ystart,yend,iters,
+    	 [mandelbrot_r(x,ystart,yend,iters,[])|cols]);
+}
+
+def mandelbrot_start(xstart, ystart, iters) {
+    mandelbrot_c(xstart,-1*xstart,ystart,-1*ystart,iters,[]);
+}
