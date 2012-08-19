@@ -29,6 +29,8 @@ options() ->
       "Print parser output and exit"},
      {assembler_only, $G, "assembler-only", undefined,
       "Print assembler generate and exit"},
+     {optimizations_only, $O, "optmizations-only", undefined, 
+      "Print optimized assembler and exit"},
      {bytecode_only, $B, "bytecode-only", undefined,
       "Print bytecode and exit"},
      {expression, $e, "expression", string,
@@ -40,7 +42,9 @@ compile_file(Options, File) ->
     {ok, Bin} = file:read_file(File),
     case scan_and_parse(Options, binary_to_list(Bin)) of
         {bytecode,ByteCode} ->
-            file:write_file(filename:rootname(File)++".alb",ByteCode);
+	    O = filename:rootname(File)++".alb",
+	    file:delete(O),
+            file:write_file(O,ByteCode);
         {_,Result} ->
             io:format("~p~n", [Result])
     end.
@@ -53,8 +57,10 @@ scan_and_parse(Options, String) ->
                      fun() -> alm_parser:tokens(Tokens) end),
         ASM    = run(Options, assembler_only,
                      fun() -> alm_compiler:generate(AST) end),
+	OASM    = run(Options, optimizations_only,
+                     fun() -> alm_opt:run(ASM) end),
         BC     = run(Options, bytecode_only,
-                     fun() -> alm_bytecode:generate(ASM) end),
+                     fun() -> alm_bytecode:generate(OASM) end),
         {bytecode,BC}
     catch
         throw:Result ->

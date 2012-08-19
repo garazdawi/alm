@@ -79,21 +79,25 @@ int alm_disasm(code_t* code) {
 
 	if (instr == I_FUNC) {
 	    GET_iABC(code->instructions+i, a, b, c);
-	    alm_printf("\r\n0x%.3llX func %T/%d\r\n",(uint64_t)(code->instructions+i),code->constants[a],b);
+	    alm_printf("\r\n0x%.3llX func %T/%d\r\n",
+		    (uint64_t) (code->instructions + i), code->constants[a], b);
 	    continue;
 	}
 
 	if (instr < 0 || instr >= INSTR_COUNT)
-	    printf("0x%.3llX ??%.3X?", (uint64_t)(code->instructions+i), instr);
+	    printf("0x%.3llX ??%.3X?", (uint64_t) (code->instructions + i),
+		    instr);
 	else
-	    printf("0x%.3llX  %-7s", (uint64_t)(code->instructions+i), instruction_to_string[instr]);
+	    printf("0x%.3llX  %-7s", (uint64_t) (code->instructions + i),
+		    instruction_to_string[instr]);
 	if (instruction_type[instr] == INSTR_iABC) {
 	    GET_iABC(code->instructions+i, a, b, c);
 	    printf(" %.3d %.3d %.3d\r\n", a, b, c);
 	} else if (instruction_type[instr] == INSTR_iABx) {
 	    GET_iABx(code->instructions+i, a, b);
 	    if (instr == I_BRT || instr == I_JUMP)
-		printf(" %.3d 0x%.3llX\r\n", a, (uint64_t)(code->instructions+i + b));
+		printf(" %.3d 0x%.3llX\r\n", a,
+			(uint64_t) (code->instructions + i + b));
 	    else
 		printf(" %.3d %.3d\r\n", a, b);
 	}

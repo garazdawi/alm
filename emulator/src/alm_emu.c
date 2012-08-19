@@ -8,8 +8,9 @@ int process_main(code_t* code, ATERM funcname, ATERM *args, int arg_len) {
     INSTR *I;
     ATERM *S;
 #define NUM_XREG 32
+#define NUM_YREG 255
     ATERM reg_x[NUM_XREG];
-    ATERM reg_y[255];
+    ATERM reg_y[NUM_YREG];
 
     int A, B, C, i;
 
@@ -18,6 +19,8 @@ int process_main(code_t* code, ATERM funcname, ATERM *args, int arg_len) {
 
     for (i = 0; i < NUM_XREG; i++)
     	reg_x[i] = (ATERM)0ull;
+    for (i = 0; i < NUM_YREG; i++)
+        reg_y[i] = (ATERM)0ull;
 
     for (i = 0; i < arg_len; i++)
       reg_x[i] = args[i];
@@ -44,8 +47,11 @@ case I_CALL: {
     S += C + 1;
     *S = mk_frame(I);
     I = f->instruction;
+    /* Have to have the below clears until I fix issue with using too gaps in x and y registers */
     for (i = B; i < NUM_XREG; i++)
 	reg_x[i] = (ATERM)0ull;
+    for (i = S-reg_y+1; i < NUM_YREG; i++)
+        reg_y[i] = (ATERM)0ull;
     I++;
     break;
 }
