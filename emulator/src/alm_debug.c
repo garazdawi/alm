@@ -36,6 +36,8 @@ int alm_print_term(ATERM t) {
 	ATERM *box = boxed_ptr(t);
 	if (is_atom(*box))
 	    count += printf("%.*s", (int) atom_size(*box), (char*) (box + 1));
+    } else if (is_frame(t)) {
+	count += printf("<frame/0x%.3llX>",frame_val(t));
     }
     return count;
 }
