@@ -18,7 +18,8 @@
 run(OrigCode) ->
     run(lists:reverse(OrigCode),[{x,0}],[],[]).
 
-
+run([{move,From,From}|T],UsedRegs,Lbls,Acc) ->
+    run(T,UsedRegs,Lbls,Acc);
 run([{move,To,NewTo},{I,LHS,RHS,To}|T],UsedRegs,Lbls,Acc) when I =/= call ->
     run([{I,LHS,RHS,NewTo}|T],UsedRegs,Lbls,Acc);
 run([{move,To,NewTo},{I,From,To}|T],UsedRegs,Lbls,Acc) when I =/= func ->

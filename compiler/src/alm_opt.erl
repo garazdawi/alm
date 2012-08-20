@@ -3,7 +3,7 @@
 -export([run/1,run/2]).
 
 run(Code) ->
-    run(Code,[dead_move_elim]).
+    run(Code,[lift_return,dead_move_elim,dead_move_elim]).
 
 run(OrigCode, Passes) ->
     lists:foldl(
