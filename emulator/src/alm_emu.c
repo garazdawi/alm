@@ -47,11 +47,9 @@ case I_CALL: {
     S += C + 1;
     *S = mk_frame(I);
     I = f->instruction;
-    /* Have to have the below clears until I fix issue with using too gaps in x and y registers */
+    /* Clear x registers so that debug printing is nicer! */
     for (i = B; i < NUM_XREG; i++)
 	reg_x[i] = (ATERM)0ull;
-    for (i = S-reg_y+1; i < NUM_YREG; i++)
-        reg_y[i] = (ATERM)0ull;
     I++;
     break;
 }
