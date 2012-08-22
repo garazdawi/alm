@@ -1,5 +1,5 @@
 OBJ_DIR=.obj
-OBJ=$(OBJ_DIR)/alm_main.o $(OBJ_DIR)/alm_loader.o $(OBJ_DIR)/alm_debug.o $(OBJ_DIR)/alm_emu.o
+OBJ=$(OBJ_DIR)/alm_main.o $(OBJ_DIR)/alm_loader.o $(OBJ_DIR)/alm_mem.o $(OBJ_DIR)/alm_debug.o $(OBJ_DIR)/alm_emu.o
 
 H_FILES=$(wildcard src/*.h)
 

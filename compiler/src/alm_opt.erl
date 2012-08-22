@@ -3,7 +3,7 @@
 -export([run/1,run/2]).
 
 run(Code) ->
-    run(Code,[{"liveness_analysis",1},"lift_return","dead_move_elim"]).
+    run(Code,["lift_return","dead_move_elim",{"gc",1}]).
 
 run(OrigCode, Passes) ->
     lists:foldl(fun run_int/2,OrigCode,Passes).

@@ -9,6 +9,7 @@
 #define ALM_INSTRUCTIONS_H_
 
 #include <stdint.h>
+#include <stdlib.h>
 
 #define INSTR_COUNT 24
 
@@ -27,6 +28,7 @@
 #define I_CALL      12
 #define I_LABEL     13
 #define I_CONS      14
+#define I_GC        15
 #define I_EQ        20
 #define I_NEQ       21
 #define I_LT        22
@@ -37,12 +39,12 @@
 
 static const char* instruction_to_string[] =
 	{ "move_xx", "move_xy", "move_yx", "load", "func", "add", "div", "mul",
-		"sub", "ret", "jmp", "brt", "call", "lbl", "cons", NULL, NULL,
+		"sub", "ret", "jmp", "brt", "call", "lbl", "cons", "gc", NULL,
 		NULL, NULL, NULL, "eq", "neq", "lt", "gt" };
 static const int instruction_type[] = { INSTR_iABC, INSTR_iABC, INSTR_iABC,
 	INSTR_iABC, INSTR_iABC, INSTR_iABC, INSTR_iABC, INSTR_iABC, INSTR_iABC,
 	INSTR_iABC, INSTR_iABx, INSTR_iABx, INSTR_iABC, INSTR_iABx, INSTR_iABC,
-	INSTR_iABC, INSTR_iABC, INSTR_iABC, INSTR_iABC, INSTR_iABC, INSTR_iABC,
+	INSTR_iABx, INSTR_iABC, INSTR_iABC, INSTR_iABC, INSTR_iABC, INSTR_iABC,
 	INSTR_iABC, INSTR_iABC, INSTR_iABC };
 
 #ifndef INSTR_FIRST

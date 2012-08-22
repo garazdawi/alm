@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include "alm_term.h"
+#include "alm_process.h"
 
 #define INSTR uint32_t
 
@@ -22,7 +23,7 @@ typedef struct code {
     function_t *func_list;
 } code_t;
 
-int load(code_t *new_code, char *filename);
+int load(process_t *c_p,code_t *new_code, char *filename);
 
 
 #endif /* ALM_LOADER_H_ */

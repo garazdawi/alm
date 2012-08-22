@@ -9,9 +9,10 @@
 #define ALM_TERM_H_
 
 #include <stdint.h>
-#include "alm_mem.h"
 
 typedef union { uint64_t bin; double num; } ATERM;
+
+#include "alm_mem.h"
 
 // All primary data types
 
@@ -38,7 +39,7 @@ typedef union { uint64_t bin; double num; } ATERM;
 #define cons_ptr(x) ((ATERM*)((x).bin & 0x0000FFFFFFFFFFFF))
 #define CONS(aterm, head, tail) \
     do { \
-	ATERM *cell = Halloc(sizeof(ATERM)*2); \
+	ATERM *cell = Halloc(2); \
 	cell[0] = head; \
 	cell[1] = tail; \
 	aterm = mk_cons(cell);\
@@ -63,7 +64,7 @@ typedef union { uint64_t bin; double num; } ATERM;
 #define tag_atom(x) (ATERM)((mk_header(x)).bin | 0x0000800000000000)
 #define mk_atom(aterm,str,len) \
     do {\
-	ATERM *atom = Halloc(sizeof(ATERM)+sizeof(char)*(len)); \
+	ATERM *atom = Halloc(1+len); \
 	*atom = tag_atom(len); \
 	strncpy((char*)(atom+1),(str),(len));\
 	aterm = mk_boxed(atom); \

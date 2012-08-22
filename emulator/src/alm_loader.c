@@ -13,7 +13,7 @@
                       (((unsigned char*) (s))[2] << 8)  | \
                       (((unsigned char*) (s))[3]))
 
-int load_constants(char **filebuf, code_t *new_code) {
+int load_constants(process_t *c_p,char **filebuf, code_t *new_code) {
     int i;
 
     new_code->num_constants = get_int32(*filebuf);
@@ -40,7 +40,7 @@ int load_constants(char **filebuf, code_t *new_code) {
     return 0;
 }
 
-int load_instructions(char **filebuf, code_t *new_code) {
+int load_instructions(process_t *c_p,char **filebuf, code_t *new_code) {
     int i, j, A, B, C;
 
     new_code->func_list = NULL;
@@ -95,7 +95,7 @@ int load_instructions(char **filebuf, code_t *new_code) {
     return 0;
 }
 
-int load(code_t *new_code, char *filename) {
+int load(process_t *c_p,code_t *new_code, char *filename) {
     struct stat st;
     int fd, i;
     char *filebuf, *fileptr;
@@ -121,8 +121,8 @@ int load(code_t *new_code, char *filename) {
 	return -1;
     }
     filebuf += 4;
-    CHK(load_constants(&filebuf,new_code) != 0);
-    CHK(load_instructions(&filebuf,new_code) != 0);
+    CHK(load_constants(c_p,&filebuf,new_code) != 0);
+    CHK(load_instructions(c_p,&filebuf,new_code) != 0);
     free(fileptr);
 
 #ifdef DEBUG

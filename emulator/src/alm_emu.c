@@ -4,28 +4,24 @@
 #include "alm_loader.h"
 #include "alm_debug.h"
 
-int process_main(code_t* code, ATERM funcname, ATERM *args, int arg_len) {
+int process_main(process_t *c_p,code_t* code, ATERM funcname, ATERM *args, int arg_len) {
     INSTR *I;
     ATERM *S;
 #define NUM_XREG 32
-#define NUM_YREG 255
     ATERM reg_x[NUM_XREG];
-    ATERM reg_y[NUM_YREG];
 
     int A, B, C, i;
 
     I = code->instructions;
-    S = reg_y;
 
     for (i = 0; i < NUM_XREG; i++)
     	reg_x[i] = (ATERM)0ull;
-    for (i = 0; i < NUM_YREG; i++)
-        reg_y[i] = (ATERM)0ull;
 
     for (i = 0; i < arg_len; i++)
       reg_x[i] = args[i];
 
     while (1) {
+#define S (c_p->h.stack)
 #define iABC_CASE(LBL, CODE) case LBL: { GET_iABC(I, A, B, C); printf("%-7s %.3d %.3d %.3d ",instruction_to_string[LBL],A,B,C); CODE; I++; break; }
 #define iABx_CASE(LBL, CODE) case LBL: { GET_iABx(I, A, B); printf("%-7s %.3d %.3d     ",instruction_to_string[LBL],A,B); CODE; I++; break; }
 	switch (GET_INSTR(I)) {
@@ -34,7 +30,7 @@ iABC_CASE(I_MOVE_XY,S[B+1] = reg_x[A])
 iABC_CASE(I_MOVE_YX,reg_x[B] = S[A+1])
 iABC_CASE(I_LOAD,reg_x[B] = code->constants[A])
 iABC_CASE(I_FUNC,*S = mk_frame(I))
-iABC_CASE(I_RET,if (S == reg_y) goto done; I = (INSTR*)frame_val(*S); do { S--; } while(!is_frame(*S)) )
+iABC_CASE(I_RET,if (S == c_p->h.top) goto done; I = (INSTR*)frame_val(*S); do { S--; } while(!is_frame(*S)) )
 iABx_CASE(I_BRT,if (num_val(reg_x[A]) == 0.0) I += B)
 iABx_CASE(I_JUMP,I += B)
 case I_CALL: {
@@ -55,6 +51,7 @@ case I_CALL: {
 }
 case I_LABEL: I++; continue;
 iABC_CASE(I_CONS,CONS(reg_x[C],reg_x[A],reg_x[B]))
+iABx_CASE(I_GC,GC_CHECK(B))
 iABC_CASE(I_ADD,reg_x[C] = mk_num(num_val(reg_x[A]) + num_val(reg_x[B])))
 iABC_CASE(I_SUB,reg_x[C] = mk_num(num_val(reg_x[A]) - num_val(reg_x[B])))
 iABC_CASE(I_MUL,reg_x[C] = mk_num(num_val(reg_x[A]) * num_val(reg_x[B])))
