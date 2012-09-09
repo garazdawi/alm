@@ -21,9 +21,10 @@ typedef struct code {
     ATERM *constants;
     INSTR *instructions;
     function_t *func_list;
+    heap_t h;
 } code_t;
 
-int load(process_t *c_p,code_t *new_code, char *filename);
+int load(code_t *new_code, char *filename);
 
 
 #endif /* ALM_LOADER_H_ */

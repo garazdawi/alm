@@ -31,11 +31,10 @@ int main (int argc, char** argv) {
     code_t code;
     ATERM args[10], funcname;
     int arg_len;
-    process_t p;
-    c_p = &p;
-    INIT_HEAP;
+    c_p = malloc(sizeof(process_t));
+    INIT_HEAP(c_p);
 
-    if (load(c_p,&code, argv[1]) == -1)
+    if (load(&code, argv[1]) == -1)
         return 1;
 
     CHK(parse_args(argv+2,&funcname,args,&arg_len) != 0);

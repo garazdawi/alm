@@ -35,7 +35,7 @@ int alm_print_term(ATERM t) {
     } else if (is_boxed(t)) {
 	ATERM *box = boxed_ptr(t);
 	if (is_atom(*box))
-	    count += printf("%.*s", (int) atom_size(*box), (char*) (box + 1));
+	    count += printf("%.*s", (int) box[1].bin, (char*) (box + 2));
     } else if (is_frame(t)) {
 	count += printf("<frame/0x%.3llX>",frame_val(t));
     }
@@ -105,4 +105,67 @@ int alm_disasm(code_t* code) {
 	}
     }
     return 1;
+}
+
+uint64_t alm_dump_heap_item(ATERM t, int stack) {
+  
+  if (is_num(t))
+      printf("%18.1lf ", num_val(t));
+    else if (is_nil(t))
+      printf("               [] ");
+    else if (is_cons(t)) {
+      printf("<cons/0x%.3llX> ", (uint64_t)cons_ptr(t));
+    } else if (is_boxed(t)) {
+      ATERM *box = boxed_ptr(t);
+      if (is_atom(*box))
+	printf("<atom/0x%.3llX> ", (uint64_t)box);
+    } else if (is_header(t)) {
+      if (stack) 
+	printf("<fram/0x%.3llX> ",(uint64_t)frame_val(t));
+      else if (is_atom(t)) {
+	printf("<atom/0x%.3llX> ",boxed_arity(t));
+	return boxed_arity(t)+1;
+      } else 
+	printf("<frwd/0x%.3llX> ",(uint64_t)frame_val(t));
+    }
+
+  return 1;
+}
+
+int alm_dump_heap(heap_t *h, int ylive, ATERM* rootset, int rootset_size) {
+  int i = 0;
+  ATERM *t = h->top;
+
+  printf("Rootset size: %d ",rootset_size);
+  printf("Stack size: %ld  ",h->stack-t+ylive);
+  printf("Heap size: %ld\r\n",h->top+h->size - h->heap);
+  
+  for (i = 0; i < rootset_size; i++ ) {
+    printf(" [%d]        : ",i);
+    alm_dump_heap_item(rootset[i],0);
+    printf("\r\n");
+  }
+
+  if (h->stack-t+ylive != 0) {
+    printf("Stack dump:\r\n");
+    
+    while(t != h->stack+ylive) {
+      printf(" 0x%.3llX: ",(uint64_t)t);
+      t += alm_dump_heap_item(*t,1);
+      printf("\r\n");
+    }
+  }
+  
+  if (h->top + h->size - h->heap != 0) {
+    printf("Heap dump:\r\n");
+    t = h->heap;
+    
+    while (t < (h->top + h->size)) {
+      printf(" 0x%.3llX: ",(uint64_t)t);
+      t += alm_dump_heap_item(*t,0);
+      printf("\r\n");
+    }
+  }
+
+  return 1;
 }

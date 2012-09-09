@@ -13,34 +13,50 @@
                       (((unsigned char*) (s))[2] << 8)  | \
                       (((unsigned char*) (s))[3]))
 
-int load_constants(process_t *c_p,char **filebuf, code_t *new_code) {
-    int i;
+int load_constants(char **o_filebuf, code_t *new_code) {
+    int i,heap_size;
+    char *filebuf;
 
-    new_code->num_constants = get_int32(*filebuf);
+    new_code->num_constants = get_int32(*o_filebuf);
     new_code->constants = malloc(sizeof(ATERM) * new_code->num_constants);
-    (*filebuf) += 4;
+    (*o_filebuf) += 4;
+
+    filebuf = *o_filebuf;
+    
+    for (i = 0; i < new_code->num_constants; i++) {
+      char type = *(filebuf++);
+      uint64_t size = *(filebuf++);
+      if (type == 1)
+	heap_size += size;
+      filebuf += size;
+    }
+
+    init_heap(&new_code->h,heap_size);
+    filebuf = *o_filebuf;
 
     for (i = 0; i < new_code->num_constants; i++) {
-	char type = *((*filebuf)++);
-	uint64_t size = *((*filebuf)++);
+	char type = *(filebuf++);
+	uint64_t size = *(filebuf++);
 	switch (type) {
 	case 0:
-	    new_code->constants[i] = mk_num((double)get_int32(*filebuf));
+	    new_code->constants[i] = mk_num((double)get_int32(filebuf));
 	    break;
 	case 1:
-	    mk_atom(new_code->constants[i], *filebuf, size);
+	    mk_atom_heap(new_code->h,new_code->constants[i], filebuf, size);
 	    break;
 	case 2:
 	    new_code->constants[i] = mk_nil();
 	    break;
 	}
-	(*filebuf) += size;
+	filebuf += size;
     }
+
+    *o_filebuf = filebuf;
 
     return 0;
 }
 
-int load_instructions(process_t *c_p,char **filebuf, code_t *new_code) {
+int load_instructions(char **filebuf, code_t *new_code) {
     int i, j, A, B, C;
 
     new_code->func_list = NULL;
@@ -95,7 +111,7 @@ int load_instructions(process_t *c_p,char **filebuf, code_t *new_code) {
     return 0;
 }
 
-int load(process_t *c_p,code_t *new_code, char *filename) {
+int load(code_t *new_code, char *filename) {
     struct stat st;
     int fd, i;
     char *filebuf, *fileptr;
@@ -121,8 +137,8 @@ int load(process_t *c_p,code_t *new_code, char *filename) {
 	return -1;
     }
     filebuf += 4;
-    CHK(load_constants(c_p,&filebuf,new_code) != 0);
-    CHK(load_instructions(c_p,&filebuf,new_code) != 0);
+    CHK(load_constants(&filebuf,new_code) != 0);
+    CHK(load_instructions(&filebuf,new_code) != 0);
     free(fileptr);
 
 #ifdef DEBUG

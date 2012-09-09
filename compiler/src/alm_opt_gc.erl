@@ -13,11 +13,11 @@ run(OrigCode) ->
 run([{return} = I|T],_,Lbls,Acc) ->
     run(T,0,Lbls,[I|Acc]);
 run([{call,_,_,LiveY} = I|T],Alloc,Lbls,Acc) when Alloc > 0 ->
-    run(T,1,Lbls,[I,{gc,Alloc+LiveY}|Acc]);
+    run(T,1,Lbls,[I,{gc,1,LiveY,Alloc}|Acc]);
 run([{call,_,_,_} = I|T],Alloc,Lbls,Acc)  ->
     run(T,Alloc+1,Lbls,[I|Acc]);
-run([{func,_,_} = I|T],Alloc,Lbls,Acc) when Alloc > 0 ->
-    run(T,0,Lbls,[I,{gc,Alloc}|Acc]);
+run([{func,_,Arity} = I|T],Alloc,Lbls,Acc) when Alloc > 0 ->
+    run(T,0,Lbls,[I,{gc,Arity,0,Alloc}|Acc]);
 run([{cons,_,_,_} = I|T],Alloc,Lbls,Acc) ->
     run(T,Alloc+2,Lbls,[I|Acc]);
 run([{move,_,{y,_}} = I|T],Alloc,Lbls,Acc) ->

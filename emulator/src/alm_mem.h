@@ -10,14 +10,11 @@
 
 #include "alm_term.h"
 
-#define HEAP_START_SIZE 100000
+#define HEAP_START_SIZE 10
 
-#define Halloc(words) c_p->h.heap -= words; c_p->h.heap
-#define GC_CHECK(needed) if (c_p->h.stack+needed > c_p->h.heap) alm_gc(c_p,needed)
-#define INIT_HEAP c_p->h.top = malloc(sizeof(ATERM)*HEAP_START_SIZE); \
-    c_p->h.stack = c_p->h.top; \
-    c_p->h.size = HEAP_START_SIZE; \
-    c_p->h.heap = c_p->h.top + HEAP_START_SIZE
+#define Halloc(P_H,words) ((P_H).heap -= words, (P_H).heap)
+#define GC_CHECK(xlive,ylive,needed) if (c_p->h.stack+needed+ylive >= c_p->h.heap) alm_gc(c_p,needed,reg_x,xlive,ylive)
+#define INIT_HEAP(P) init_heap(&(P)->h,HEAP_START_SIZE)
 
 
 typedef struct heap {
@@ -27,6 +24,6 @@ typedef struct heap {
     uint32_t size;
 } heap_t;
 
-extern heap_t *h;
+int init_heap(heap_t *h, uint32_t size);
 
 #endif /* ALM_MEM_H_ */

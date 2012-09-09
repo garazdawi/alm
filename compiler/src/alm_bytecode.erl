@@ -78,7 +78,7 @@ gen_constant(Str) when length(Str) < 255 ->
 ?gen_code({label,Lbl},        ?iABx(?LABEL,   0,       Lbl            ));
 ?gen_code({cons,L,R,D},       ?iABC(?CONS,    ?X(L),   ?X(R),   ?X(D) ));
 ?gen_code({eq,L,R,D},         ?iABC(?EQ,      ?X(L),   ?X(R),   ?X(D) ));
-?gen_code({gc,Alloc},         ?iABx(?GC,      0,       Alloc          ));
+?gen_code({gc,X,Y,Needed},    ?iABC(?GC,      X,       Y,       Needed));
 ?gen_code({neq,L,R,D},        ?iABC(?NEQ,     ?X(L),   ?X(R),   ?X(D) ));
 ?gen_code({lt,L,R,D},         ?iABC(?LT,      ?X(L),   ?X(R),   ?X(D) ));
 ?gen_code({gt,L,R,D},         ?iABC(?GT,      ?X(L),   ?X(R),   ?X(D) ));
